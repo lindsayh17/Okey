@@ -50,6 +50,7 @@ class GameWindow(arcade.Window):
                 anchor_y="center",
             )
 
+
     # When user presses a mouse button
     def on_mouse_press(self, x, y, button, key_modifiers):
         pass
