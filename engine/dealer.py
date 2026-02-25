@@ -5,7 +5,6 @@
 
 import random
 
-from engine import draw_pile
 from engine.tile import Tile
 from engine.player import Player
 from engine.draw_pile import DrawPile
@@ -55,6 +54,9 @@ class Dealer:
 
         # Starting player is dealt 15 tiles
         players[starting_player_idx].draw_tile(tiles.pop())
+        
+        # remaining tiles go on draw pile
+        draw_pile = DrawPile(tiles)
 
         # return board state for the round
         return Board(players, draw_pile, starting_player_idx)
