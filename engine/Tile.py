@@ -1,4 +1,4 @@
-# engine/Tile.py
+# Minimal Tile class
 
 COLORS = ("red", "blue", "black", "orange")
 
