@@ -1,4 +1,4 @@
-# This is the face-down draw pile (middle pile)
+# This is the face down draw pile (middle pile)
 
 class DrawPile:
     def __init__(self, tiles=None):
