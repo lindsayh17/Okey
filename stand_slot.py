@@ -13,7 +13,8 @@ class Stand_Slot(arcade.Sprite):
         self.texture = arcade.make_soft_square_texture(
             80,
             self.value_color,
-            outer_alpha = 255
+            outer_alpha=255
+
         )
 
         self.width = STAND_WIDTH

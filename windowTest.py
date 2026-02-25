@@ -1,70 +1,180 @@
 import arcade
+
+from com import Com, COM_WIDTH
+from deck import Deck
 from tile import Tile, TILE_WIDTH, TILE_HEIGHT
 from stand_slot import Stand_Slot, STAND_WIDTH, STAND_HEIGHT
+from discard import Discard
 
 # Game window class
 class GameWindow(arcade.Window):
 
     def __init__(self):
         super().__init__(
+            1000,
             800,
-            600,
             "Test Game",
             resizable=True
         )
+
+        # Background color
         self.background_color = arcade.color.LINCOLN_GREEN
 
+        #  Sprite lists
         self.stand_slot_list = arcade.SpriteList()
         self.tile_list = arcade.SpriteList()
+        self.com_list = arcade.SpriteList()
 
+        # Discard list, since discard is not a sprite
+        self.discard_list = []
+
+        # Coordinates of stand start
         self.stand_start_x = 0
-        self.stand_start_y = 0
+
+        # Tile stand specifications
         self.rows = 2
         self.columns = 12
         self.total_stand_width = self.columns * STAND_WIDTH
 
+        # Stand divider line size
+        self.stand_divider = 5
+
+        self.total_stand_height = self.rows * STAND_HEIGHT + self.stand_divider
 
 
     # Set up game
     def setup(self):
+        # Clear any existing sprites
         self.stand_slot_list.clear()
+        self.tile_list.clear()
+        self.com_list.clear()
+        self.discard_list.clear()
 
-        # Width of the whole screen
+        # Stand coordinates
+        self.setup_stand()
+        # Com coordinates
+        self.setup_coms()
+        # Deck coordinates
+        self.setup_deck()
+        # Discard pile coordinates
+        self.setup_discard()
+
+
+    # Screen render that clears the board
+    def on_draw(self):
+        # Clear everything
+        self.clear()
+
+        # Draw stand
+        self.stand_slot_list.draw()
+
+        # draw stand line divider
+        arcade.draw_lbwh_rectangle_filled(
+            self.stand_start_x - STAND_WIDTH / 2,
+            STAND_HEIGHT,
+            self.total_stand_width,
+            self.stand_divider,
+            arcade.color.DEEP_COFFEE,
+        )
+
+        # Draw coms
+        self.com_list.draw()
+        for com in self.com_list:
+            # Need to add text to existing sprite square texture
+            arcade.draw_text(
+                com.name,
+                com.center_x,
+                com.center_y,
+                arcade.color.WHITE,
+                font_size=15,
+                anchor_x="center",
+                anchor_y="center",
+            )
+
+        # Draw discard piles
+        for disc in self.discard_list:
+            disc.draw()
+        # Draw deck
+        self.deck.draw()
+
+    def setup_stand(self):
         screen_width = self.width
 
-        # Where to start the stand based on the size of the screen
-        self.stand_start_x = (screen_width - self.total_stand_width) / 2 + STAND_WIDTH / 2
-        self.stand_start_y = STAND_HEIGHT + 20
+        # Coordinates of the stand based on the size of the screen
+        self.stand_start_x = int((screen_width - self.total_stand_width) / 2 + STAND_WIDTH / 2)
 
         # 2 rows in the tile stand
         for row in range(self.rows):
+            stand_y = int((STAND_HEIGHT / 2) + row * (STAND_HEIGHT + self.stand_divider))
             # 12 slots on each row
             for column in range(self.columns):
                 # stand_slot position
-                stand_x = self.stand_start_x + (column * STAND_WIDTH)
-                stand_y = self.stand_start_y - row * STAND_HEIGHT
+                stand_x = int(self.stand_start_x + (column * STAND_WIDTH))
 
                 # create stand_slot and append to the slot list
                 stand_slot = Stand_Slot(stand_x, stand_y, arcade.color.BEAVER)
                 self.stand_slot_list.append(stand_slot)
 
+    # Com setup
+    def setup_coms(self):
+        screen_width = self.width
+        screen_height = self.height
 
+        # Com coordinates
+        com1_x = COM_WIDTH
+        com1_y = screen_height / 2
+        com2_x = screen_width  - COM_WIDTH
+        com2_y = screen_height / 2
+        com3_x = self.width / 2
+        com3_y = screen_height - 100
 
-    # Screen render that clears the board
-    def on_draw(self):
-        self.clear()
+        # Make each com
+        com1 = Com(com1_x, com1_y, arcade.color.RED, "Com 1")
+        com2 = Com(com2_x, com2_y, arcade.color.BLUE, "Com 2")
+        com3 = Com(com3_x, com3_y, arcade.color.YELLOW, "Com 3")
 
-        self.stand_slot_list.draw()
+        # Add each com to the list
+        self.com_list.append(com1)
+        self.com_list.append(com2)
+        self.com_list.append(com3)
 
-        # Stand line divider
-        divider_y = self.stand_start_y - (STAND_HEIGHT / 2)
+    # Discard piles setup
+    def setup_discard(self):
 
-        # Com icon boxes
+        # Placing discards on thirds of the screen size
+        third_width = self.width / 3
+        third_height = self.height / 3
 
-        # Deck outline
+        # Discard pile coordinates
+        left_disc_x = third_width - TILE_WIDTH
+        right_disc_x = third_width * 2 + TILE_WIDTH
+        top_disc_y = third_height * 2
+        bottom_disc_y = third_height
 
-        # Discard pile outlines
+        # Make each discard pile
+        com1_disc = Discard(left_disc_x, bottom_disc_y,)
+        com2_disc = Discard(right_disc_x, top_disc_y,)
+        com3_disc = Discard(left_disc_x, top_disc_y,)
+        player_disc = Discard(right_disc_x, bottom_disc_y,)
 
+        # Add discard piles to list
+        self.discard_list.append(com1_disc)
+        self.discard_list.append(com2_disc)
+        self.discard_list.append(com3_disc)
+        self.discard_list.append(player_disc)
+
+    # Deck setup
+    def setup_deck(self):
+        self.deck = Deck(
+            self.width / 2,
+            self.height / 2,
+        )
+
+    # Resize window
+    def on_resize(self, width, height):
+        super().on_resize(width, height)
+        # Run setup again with new screen size
+        self.setup()
 
 def main():
     window = GameWindow()
