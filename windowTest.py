@@ -3,7 +3,7 @@ import arcade
 from com import Com, COM_WIDTH
 from deck import Deck
 from tile import Tile, TILE_WIDTH, TILE_HEIGHT
-from stand_slot import Stand_Slot, STAND_WIDTH, STAND_HEIGHT
+from stand_slot import Stand_Slot
 from discard import Discard
 
 # Game window class
@@ -21,12 +21,12 @@ class GameWindow(arcade.Window):
         self.background_color = arcade.color.LINCOLN_GREEN
 
         #  Sprite lists
-        self.stand_slot_list = arcade.SpriteList()
         self.tile_list = arcade.SpriteList()
         self.com_list = arcade.SpriteList()
 
-        # Discard list, since discard is not a sprite
+        # Non-sprite lists
         self.discard_list = []
+        self.stand_slot_list = []
 
         # Coordinates of stand start
         self.stand_start_x = 0
@@ -34,12 +34,12 @@ class GameWindow(arcade.Window):
         # Tile stand specifications
         self.rows = 2
         self.columns = 12
-        self.total_stand_width = self.columns * STAND_WIDTH
+        self.total_stand_width = self.columns * TILE_WIDTH
 
         # Stand divider line size
         self.stand_divider = 5
 
-        self.total_stand_height = self.rows * STAND_HEIGHT + self.stand_divider
+        self.total_stand_height = self.rows * TILE_HEIGHT + self.stand_divider
 
 
     # Set up game
@@ -66,12 +66,13 @@ class GameWindow(arcade.Window):
         self.clear()
 
         # Draw stand
-        self.stand_slot_list.draw()
+        for stand in self.stand_slot_list:
+            stand.draw()
 
         # draw stand line divider
         arcade.draw_lbwh_rectangle_filled(
-            self.stand_start_x - STAND_WIDTH / 2,
-            STAND_HEIGHT,
+            self.stand_start_x - TILE_WIDTH / 2,
+            TILE_HEIGHT,
             self.total_stand_width,
             self.stand_divider,
             arcade.color.DEEP_COFFEE,
@@ -101,15 +102,16 @@ class GameWindow(arcade.Window):
         screen_width = self.width
 
         # Coordinates of the stand based on the size of the screen
-        self.stand_start_x = int((screen_width - self.total_stand_width) / 2 + STAND_WIDTH / 2)
+        self.stand_start_x = (screen_width - self.total_stand_width) / 2 + TILE_WIDTH / 2
+
 
         # 2 rows in the tile stand
         for row in range(self.rows):
-            stand_y = int((STAND_HEIGHT / 2) + row * (STAND_HEIGHT + self.stand_divider))
+            stand_y = (TILE_HEIGHT / 2) + row * TILE_HEIGHT
             # 12 slots on each row
             for column in range(self.columns):
                 # stand_slot position
-                stand_x = int(self.stand_start_x + (column * STAND_WIDTH))
+                stand_x = self.stand_start_x + column * TILE_WIDTH
 
                 # create stand_slot and append to the slot list
                 stand_slot = Stand_Slot(stand_x, stand_y, arcade.color.BEAVER)
@@ -123,15 +125,16 @@ class GameWindow(arcade.Window):
         # Com coordinates
         com1_x = COM_WIDTH
         com1_y = screen_height / 2
-        com2_x = screen_width  - COM_WIDTH
-        com2_y = screen_height / 2
-        com3_x = self.width / 2
-        com3_y = screen_height - 100
+        com2_x = self.width / 2
+        com2_y = screen_height - COM_WIDTH
+        com3_x = screen_width  - COM_WIDTH
+        com3_y = screen_height / 2
+
 
         # Make each com
         com1 = Com(com1_x, com1_y, arcade.color.RED, "Com 1")
-        com2 = Com(com2_x, com2_y, arcade.color.BLUE, "Com 2")
-        com3 = Com(com3_x, com3_y, arcade.color.YELLOW, "Com 3")
+        com2 = Com(com2_x, com2_y, arcade.color.YELLOW, "Com 2")
+        com3 = Com(com3_x, com3_y, arcade.color.BLUE, "Com 3")
 
         # Add each com to the list
         self.com_list.append(com1)

@@ -1,26 +1,28 @@
 import arcade
+from tile import Tile, TILE_WIDTH, TILE_HEIGHT
 
-STAND_WIDTH = 60
-STAND_HEIGHT = 75
-
-
-class Stand_Slot(arcade.Sprite):
+class Stand_Slot:
     def __init__(self, x, y, color):
-        super().__init__(hit_box_algorithm="None")
-
-        self.value_color = tuple(color)
-
-        self.texture = arcade.make_soft_square_texture(
-            80,
-            self.value_color,
-            outer_alpha=255
-
-        )
-
-        self.width = STAND_WIDTH
-        self.height = STAND_HEIGHT
-
         self.center_x = x
         self.center_y = y
+        self.color = color
+        self.size = 5
+        self.width = TILE_WIDTH
+        self.height = TILE_HEIGHT
+        self.border_width = 4
+
+        # For when adding tiles to stand
+        self.occupied = False
+
+    def draw(self):
+        arcade.draw_lbwh_rectangle_filled(
+            self.center_x - TILE_WIDTH / 2,
+            self.center_y - TILE_HEIGHT / 2,
+            self.width,
+            self.height,
+            self.color
+        )
+
+
 
 
