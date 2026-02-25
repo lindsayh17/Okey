@@ -13,7 +13,7 @@ class GameWindow(arcade.Window):
         super().__init__(
             1000,
             800,
-            "Test Game",
+            "Okey",
             resizable=True
         )
 
@@ -49,7 +49,6 @@ class GameWindow(arcade.Window):
         self.tile_list.clear()
         self.com_list.clear()
         self.discard_list.clear()
-
         # Stand coordinates
         self.setup_stand()
         # Com coordinates
@@ -58,7 +57,6 @@ class GameWindow(arcade.Window):
         self.setup_deck()
         # Discard pile coordinates
         self.setup_discard()
-
 
     # Screen render that clears the board
     def on_draw(self):

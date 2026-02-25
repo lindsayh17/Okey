@@ -2,7 +2,6 @@ import arcade
 
 from tile import TILE_WIDTH, TILE_HEIGHT
 
-
 class Deck:
     def __init__(self, x, y):
         self.center_x = x

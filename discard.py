@@ -2,16 +2,14 @@ import arcade
 
 from tile import TILE_WIDTH, TILE_HEIGHT
 
-
 class Discard:
     def __init__(self, x, y):
         self.center_x = x
         self.center_y = y
+        self.boarder = 4
 
         # For when there are tiles to put in the deck
         # self.tiles = arcade.SpriteList()
-
-        self.boarder = 4
 
     def draw(self):
         arcade.draw_lbwh_rectangle_outline(

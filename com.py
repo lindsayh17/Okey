@@ -2,7 +2,6 @@ import arcade
 
 COM_WIDTH = 75
 
-
 class Com(arcade.Sprite):
     def __init__(self, x, y, color, name):
         super().__init__(hit_box_algorithm="None")
@@ -19,3 +18,5 @@ class Com(arcade.Sprite):
             self.value_color,
             outer_alpha = 255
         )
+
+    # Highlight com to show hand

@@ -3,7 +3,6 @@ import arcade
 TILE_WIDTH = 80
 TILE_HEIGHT = 100
 
-
 class Tile(arcade.Sprite):
     def __init__(self, x, y, color, value):
         super().__init__(hit_box_algorithm="None")
