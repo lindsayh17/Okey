@@ -1,6 +1,6 @@
 import arcade
 
-from tile import TILE_WIDTH, TILE_HEIGHT
+from engine.tile import TILE_WIDTH, TILE_HEIGHT
 
 class Discard:
     def __init__(self, x, y):

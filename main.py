@@ -1,7 +1,7 @@
 import arcade
 from com import Com, COM_WIDTH
 from deck import Deck
-from tile import Tile, TILE_WIDTH, TILE_HEIGHT
+from engine.tile import Tile, TILE_WIDTH, TILE_HEIGHT
 from stand_slot import Stand_Slot
 from discard import Discard
 

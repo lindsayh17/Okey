@@ -1,5 +1,5 @@
 import arcade
-from tile import Tile, TILE_WIDTH, TILE_HEIGHT
+from engine.tile import TILE_WIDTH, TILE_HEIGHT
 
 class Stand_Slot:
     def __init__(self, x, y, color):
