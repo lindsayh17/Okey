@@ -3,9 +3,11 @@ class Player:
         self.name = name
         self.is_player_ai = is_player_ai
         self.hand = [] # every player has a hand of tiles, empty initially
+        self.played = [] # tiles that are displayed when the player opens
         self.discard_pile = [] # player's discard piles, empty initially
         self.opened = False
         self.stars = 0
+        self.turn_score = 0 # score during a round that is added to total
         self.total_score = 0 # accumulates over the no. of rounds
 
     def draw_tile(self, tile):
@@ -27,11 +29,4 @@ class Player:
             return self.discard_pile[-1]
         else:
             return None
-
-
-
-
-
-
-
 
