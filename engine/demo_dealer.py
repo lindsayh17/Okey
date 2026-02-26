@@ -1,6 +1,9 @@
+# Quick demo file to verify Dealer and engine setup are working correctly
+# It builds the tile set, giving 106
+# Deals correctly (15, 14, 14, 14)
+# Player hand sizes are printed as well as the remaining draw pile count 
+
 from engine.dealer import Dealer
-
-
 
 def main():
     dealer = Dealer()
