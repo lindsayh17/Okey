@@ -11,3 +11,5 @@ class Board:
         self.starting_player_idx = starting_player_idx
         self.curr_player_idx = starting_player_idx # at start, current player is the starting player
         self.last_discard = None # at start, no previous discard yet
+        #Minimum value needed to open
+        self.min_open = 81 #starts at 81 and is increased each time a player opens
