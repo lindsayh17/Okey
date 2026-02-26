@@ -1,7 +1,7 @@
 import arcade
 from com import Com, COM_WIDTH
 from deck import Deck
-from engine.tile import Tile, TILE_WIDTH, TILE_HEIGHT
+from engine.tile import Tile, TILE_WIDTH, TILE_HEIGHT, TILE_COLORS_SYMBOLS
 from stand_slot import Stand_Slot
 from discard import Discard
 
@@ -53,31 +53,22 @@ class GameWindow(arcade.Window):
         self.setup_discard()
 
         # TODO: maybe separate this out into another file
+        # create tiles
         x = 0
         y = 300
         for i in range(1, 14):
-            # red tile
-            tile = Tile(x, y, arcade.color.RED, i)
-            self.tile_list.append(tile)
-            x+=TILE_WIDTH + 2
+            for color in TILE_COLORS_SYMBOLS.keys():
+                tile = Tile(x, y, i, color, TILE_COLORS_SYMBOLS[color])
+                self.tile_list.append(tile)
+                x += TILE_WIDTH + 2
 
-            # orange tile
-            tile = Tile(x, y, arcade.color.ORANGE, i)
-            self.tile_list.append(tile)
-            x += TILE_WIDTH + 2
+                tile = Tile(x, y, i, color, TILE_COLORS_SYMBOLS[color])
+                self.tile_list.append(tile)
+                x += TILE_WIDTH + 2
 
-            # blue tile
-            tile = Tile(x, y, arcade.color.BLUE, i)
-            self.tile_list.append(tile)
-            x += TILE_WIDTH + 2
-
-            # black tile
-            tile = Tile(x, y, arcade.color.BLACK, i)
-            self.tile_list.append(tile)
-            x += TILE_WIDTH + 2
-
+        # create jokers
         for i in range(1, 3):
-            tile = Tile(x, y, arcade.color.GREEN, "★")
+            tile = Tile(x, y, "〠", arcade.color.FOREST_GREEN, "⚡", True)
             self.tile_list.append(tile)
             x += TILE_WIDTH + 2
 
