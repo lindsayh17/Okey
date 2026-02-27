@@ -6,15 +6,16 @@ from stand_slot import Stand_Slot
 from discard import Discard
 
 # Game window class
-class GameWindow(arcade.Window):
+class GameView(arcade.View):
 
     def __init__(self):
-        super().__init__(
-            1000,
-            800,
-            "Test Game",
-            resizable=True
-        )
+        # super().__init__(
+        #     1000,
+        #     800,
+        #     "Test Game",
+        #     resizable=True
+        # )
+        super().__init__()
         self.background_color = arcade.color.LINCOLN_GREEN
 
         # Sprite list goes here
@@ -228,8 +229,13 @@ class GameWindow(arcade.Window):
         self.tile_list.append(selected_tile)
 
 def main():
-    window = GameWindow()
-    window.setup()
+    window = arcade.Window(1000,
+            800,
+            "Test Game",
+            resizable=True)
+    start_view = GameView()
+    window.show_view(start_view)
+    start_view.setup()
     arcade.run()
 
 if __name__ == "__main__":
