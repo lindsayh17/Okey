@@ -17,6 +17,9 @@ class GameView(arcade.View):
         self.tile_list = arcade.SpriteList()
         self.com_list = arcade.SpriteList()
 
+        # com text
+        self.com_labels = []
+
         # Non-sprite lists
         self.discard_list = []
         self.stand_slot_list = []
@@ -89,17 +92,8 @@ class GameView(arcade.View):
 
         # Draw coms
         self.com_list.draw()
-        for com in self.com_list:
-            # Need to add text to existing sprite square texture
-            arcade.draw_text(
-                com.name,
-                com.center_x,
-                com.center_y,
-                arcade.color.WHITE,
-                font_size=15,
-                anchor_x="center",
-                anchor_y="center",
-            )
+        for label in self.com_labels:
+            label.draw()
 
         # Draw discard piles
         for disc in self.discard_list:
@@ -152,6 +146,20 @@ class GameView(arcade.View):
         self.com_list.append(com1)
         self.com_list.append(com2)
         self.com_list.append(com3)
+
+        # create labels
+        for com in self.com_list:
+            # Need to add text to existing sprite square texture
+            label = arcade.Text(
+                com.name,
+                com.center_x,
+                com.center_y,
+                arcade.color.WHITE,
+                font_size=15,
+                anchor_x="center",
+                anchor_y="center",
+            )
+            self.com_labels.append(label)
 
     # Discard piles setup
     def setup_discard(self):
