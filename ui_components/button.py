@@ -15,16 +15,9 @@ class Button():
         self.hover_color = arcade.color.SPRING_GREEN
         self.current_color = self.color
 
-        self.label = arcade.Text(
-            self.text,
-            self.center_x,
-            self.center_y - self.height // 4,
-            self.text_color,
-            font_size= self.height * 0.6,
-            anchor_x="center",
-            font_name="Itim"
-        )
+        self.rect = None
 
+    def draw(self):
         # draw a rounded rectangle
         self.rect = rounded_rectangle.RoundedRectangle(self.center_x,
                                                   self.center_y,
@@ -33,10 +26,26 @@ class Button():
                                                   self.radius,
                                                   self.color)
 
-    def draw(self):
-
         # draw button text
-        arcade.load_font("../assets/fonts/Itim-Regular.ttf")
-
+        arcade.load_font("assets/fonts/Itim-Regular.ttf")
+        txt = arcade.Text(
+            self.text,
+            self.center_x,
+            self.center_y - self.height // 4,
+            self.text_color,
+            font_size= self.height * 0.6,
+            anchor_x="center",
+            font_name="Itim"
+        )
         self.rect.draw()
-        self.label.draw()
+        txt.draw()
+
+    def button_pressed(self, x, y):
+        """
+        Checks if the button collides with the point pressed
+
+        :param x: x coordinate
+        :param y: y coordinate
+        :return: true if collides, false otherwise
+        """
+        return self.rect.collided_with_rect(x, y)
