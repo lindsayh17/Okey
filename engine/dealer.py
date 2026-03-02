@@ -19,9 +19,9 @@ class Dealer:
         # Numbers 1-13; 2 copies of each
         # 2 jokers
         # 4 colors
-
+        # 4 shapes
         tiles = []
-        for i in range(0,3):
+        for i in range(len(Tile.colors)):
             for number in range(1, 14):
                 # appending two copies of each tile
                 tiles.append(Tile(Tile.colors[i], number, Tile.suits[i], False, 0))
