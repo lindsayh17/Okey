@@ -54,7 +54,7 @@ class Player:
         number_groups = defaultdict(list)
 
         for tile in score_hand:
-            number_groups[tile.number].append(tile)
+            number_groups[tile.value].append(tile)
 
         # Evaluate each number group to see if it forms a valid set
         for number, tiles in number_groups.items():
@@ -78,7 +78,7 @@ class Player:
                     used_tiles.add(tile)
 
                 # Add sum of tile numbers to score
-                self.hand_score += sum(tile.number for tile in valid_set)
+                self.hand_score += sum(tile.value for tile in valid_set)
 
         # ===================================
         # Check For Runs (Using Remaining Tiles Only)
@@ -98,8 +98,8 @@ class Player:
             # Sort tiles by number to detect consecutive values
             # Ignores Jokers for the time being
             tiles = sorted(
-                [t for t in tiles if t.number is not None],
-                key=lambda t: t.number
+                [t for t in tiles if t.value is not None],
+                key=lambda t: t.value
             )
 
             # Start building a potential run
@@ -109,13 +109,13 @@ class Player:
             for i in range(1, len(tiles)):
 
                 # If current tile is exactly 1 greater than previous → consecutive
-                if tiles[i].number == tiles[i - 1].number + 1:
+                if tiles[i].value == tiles[i - 1].value + 1:
                     current_run.append(tiles[i])
 
                 else:
                     # Sequence broke — check if the previous run is valid
                     if len(current_run) >= 3:
-                        self.hand_score += sum(t.number for t in current_run)
+                        self.hand_score += sum(t.value for t in current_run)
 
                         # Mark run tiles as used
                         for t in current_run:
@@ -126,7 +126,7 @@ class Player:
 
             # After loop ends, check the final run
             if len(current_run) >= 3:
-                self.hand_score += sum(t.number for t in current_run)
+                self.hand_score += sum(t.value for t in current_run)
                 for t in current_run:
                     used_tiles.add(t)
 
@@ -135,5 +135,5 @@ class Player:
     
     # Calculates the turn score after the turn has ended
     def get_turn_score(self):
-        self.hand_score += sum(tile.number for tile in self.hand)
+        self.hand_score += sum(tile.value for tile in self.hand)
         return self.turn_score
