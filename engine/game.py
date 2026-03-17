@@ -31,8 +31,8 @@ class Game:
         # initialize a list of tiles
         self.tiles = self.dealer.build_okey_set()
 
-        # create draw pile
-        self.draw_pile = DrawPile
+        # create draw pile - put all tiles in draw pile for now
+        self.draw_pile = DrawPile(self.tiles)
 
     def discard_setup(self):
         """
