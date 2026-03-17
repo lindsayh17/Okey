@@ -3,7 +3,7 @@ from com import Com, COM_WIDTH
 from deck import Deck
 from engine.tile import Tile, TILE_WIDTH, TILE_HEIGHT, TILE_COLORS_SYMBOLS
 from stand_slot import Stand_Slot
-from discard import Discard
+from engine.game import Game
 import math
 import assets.colors as colr
 
@@ -12,9 +12,14 @@ class GameView(arcade.View):
 
     def __init__(self):
         super().__init__()
+
+        # create a new game
+        self.game = Game(self.width, self.height)
+
         self.background_color = colr.THEME_LIGHT_BLUE
 
         # Sprite list goes here
+        # TODO: use the hand from human player
         self.tile_list = arcade.SpriteList()
         self.com_list = arcade.SpriteList()
 
@@ -22,7 +27,6 @@ class GameView(arcade.View):
         self.com_labels = []
 
         # Non-sprite lists
-        self.discard_list = []
         self.stand_slot_list = []
 
         # Stand specifications
@@ -37,20 +41,20 @@ class GameView(arcade.View):
 
     # Set up game
     def setup(self):
+        # need to do this here so width and height are set up
+        self.game = Game(self.width, self.height)
 
         # Clear any existing sprites
         self.stand_slot_list.clear()
         self.tile_list.clear()
         self.com_list.clear()
-        self.discard_list.clear()
+
         # Stand coordinates
         self.setup_stand()
         # Com coordinates
         self.setup_coms()
         # Deck coordinates
         self.setup_deck()
-        # Discard pile coordinates
-        self.setup_discard()
 
         # TODO: maybe separate this out into another file
         # create tiles
@@ -72,7 +76,11 @@ class GameView(arcade.View):
             self.tile_list.append(tile)
             x += TILE_WIDTH + 2
 
+        # player name pop-up
+        self.game.enter_player_name()
 
+        # play the game
+        self.game.play_game()
 
     # Screen render that clears the board
     def on_draw(self):
@@ -97,7 +105,7 @@ class GameView(arcade.View):
             label.draw()
 
         # Draw discard piles
-        for disc in self.discard_list:
+        for disc in self.game.discards:
             disc.draw()
         # Draw deck
         self.deck.draw()
@@ -162,33 +170,6 @@ class GameView(arcade.View):
             )
             self.com_labels.append(label)
 
-    # Discard piles setup
-    def setup_discard(self):
-
-        # Placing discards on thirds of the screen size
-        third_width = self.width / 3
-        third_height = self.height / 3
-
-        # Discard pile coordinates
-        left_disc_x = third_width - TILE_WIDTH
-        right_disc_x = third_width * 2 + TILE_WIDTH
-        top_disc_y = third_height * 2
-        bottom_disc_y = third_height
-
-        # Make each discard pile
-        com1_disc = Discard(left_disc_x, bottom_disc_y, )
-        com1_disc.player_com_discard = True
-        com2_disc = Discard(right_disc_x, top_disc_y, )
-        com3_disc = Discard(left_disc_x, top_disc_y, )
-        player_disc = Discard(right_disc_x, bottom_disc_y, )
-        player_disc.player_discard = True
-
-        # Add discard piles to list
-        self.discard_list.append(com1_disc)
-        self.discard_list.append(com2_disc)
-        self.discard_list.append(com3_disc)
-        self.discard_list.append(player_disc)
-
     # Deck setup
     def setup_deck(self):
         self.deck = Deck(
@@ -218,7 +199,7 @@ class GameView(arcade.View):
 
         # Add player discard pile to list of slots
         available_slots = self.stand_slot_list
-        for disc in self.discard_list:
+        for disc in self.game.discards:
             if disc.player_discard:
                 available_slots.append(disc)
 

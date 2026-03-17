@@ -1,12 +1,13 @@
 from collections import defaultdict
+from engine.discard import DiscardPile
 
 class Player:
-    def __init__(self, name, is_player_ai = False): # distinguish human player vs AI player
+    def __init__(self, disc, name, is_player_ai = False): # distinguish human player vs AI player
         self.name = name
         self.is_player_ai = is_player_ai
         self.hand = [] # every player has a hand of tiles, empty initially
         self.played = [] # tiles that are displayed when the player opens
-        self.discard_pile = [] # player's discard piles, empty initially
+        self.discard_pile = disc # player's discard piles, empty initially
         self.opened = False
         self.stars = 0
         self.hand_score = 0 #score used for opening

@@ -34,14 +34,9 @@ class Dealer:
         return tiles
 
     # Dealer to set up a new round,
-    def deal_new_round(self, player_names, starting_player_idx = 0):
-        if len(player_names) != 4:
+    def deal_new_round(self, players, starting_player_idx = 0):
+        if len(players) != 4:
             raise AttributeError('Okey game requires four players.')
-
-        # creating player objs
-        players = []
-        for name in player_names:
-            players.append(Player(name))
 
         # Build + shuffle
         tiles = self.build_okey_set()
