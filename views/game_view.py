@@ -21,7 +21,7 @@ class GameView(arcade.View):
         self.background_color = colr.THEME_LIGHT_BLUE
 
         # Sprite list goes here
-        # TODO: use the hand from human player
+        # TODO: use the hand from human player as the list of tiles
         self.tile_list = arcade.SpriteList()
         self.com_list = arcade.SpriteList()
 

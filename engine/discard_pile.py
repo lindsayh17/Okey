@@ -6,7 +6,12 @@ class DiscardPile:
     """
     Pile of tiles that a player has discarded
     """
-    def __init__(self, x, y):
+    def __init__(self, x, y, tiles=None):
+        # list of tiles that are in this discard pile
+        if tiles is None:
+            tiles = []
+        self.tiles = tiles
+
         self.center_x = x
         self.center_y = y
         self.boarder = 4

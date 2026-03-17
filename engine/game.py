@@ -5,7 +5,7 @@ from engine.board import Board
 from engine.dealer import Dealer
 from engine.player import Player
 from engine.draw_pile import DrawPile
-from engine.discard import DiscardPile
+from engine.discard_pile import DiscardPile
 from engine.tile import TILE_WIDTH
 
 class Game:
