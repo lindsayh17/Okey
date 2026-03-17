@@ -3,6 +3,9 @@ import arcade
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 
 class DiscardPile:
+    """
+    Pile of tiles that a player has discarded
+    """
     def __init__(self, x, y):
         self.center_x = x
         self.center_y = y

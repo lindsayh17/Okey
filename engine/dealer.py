@@ -6,11 +6,13 @@
 import random
 
 from engine.tile import Tile, TILE_COLORS_SYMBOLS
-from engine.player import Player
 from engine.draw_pile import DrawPile
 from engine.board import Board
 
 class Dealer:
+    """
+    TODO: make docstring
+    """
     def __init__(self):
         self.rng = random.Random()
 
@@ -28,7 +30,8 @@ class Dealer:
                 tiles.append(Tile(0, 0, number, color, TILE_COLORS_SYMBOLS[color], False, 1))
 
         # Adding the jokers
-        tiles.append(Tile(0, 0, None, (0,0,0), 0, True)) # joker holding value to be implemented later
+        tiles.append(Tile(0, 0, None, (0,0,0),
+                          0, True)) # joker holding value to be implemented later
         tiles.append(Tile(0, 0, None, (0,0,0), 1, True))
 
         return tiles
@@ -43,7 +46,7 @@ class Dealer:
         self.rng.shuffle(tiles)
 
         # Deal 14 tiles to each player
-        for i in range(14):
+        for _ in range(14):
             for player in players:
                 player.draw_tile(tiles.pop())
 
@@ -55,11 +58,3 @@ class Dealer:
 
         # return board state for the round
         return Board(players, draw_pile, starting_player_idx)
-
-
-
-
-
-
-
-

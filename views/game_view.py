@@ -1,15 +1,17 @@
+import math
 import arcade
 from com import Com, COM_WIDTH
 from deck import Deck
-from engine.tile import Tile, TILE_WIDTH, TILE_HEIGHT, TILE_COLORS_SYMBOLS
 from stand_slot import Stand_Slot
 from engine.game import Game
-import math
+from engine.tile import Tile, TILE_WIDTH, TILE_HEIGHT, TILE_COLORS_SYMBOLS
 import assets.colors as colr
 
 # Game window class
 class GameView(arcade.View):
-
+    """
+    Main view for the program as the game is being played
+    """
     def __init__(self):
         super().__init__()
 
@@ -38,6 +40,7 @@ class GameView(arcade.View):
         self.total_stand_width = self.columns * TILE_WIDTH
 
         self.held_tiles = []
+        self.deck = None
 
     # Set up game
     def setup(self):
@@ -61,12 +64,12 @@ class GameView(arcade.View):
         x = 0
         y = 300
         for i in range(1, 14):
-            for color in TILE_COLORS_SYMBOLS.keys():
-                tile = Tile(x, y, i, color, TILE_COLORS_SYMBOLS[color])
+            for color, symbol in TILE_COLORS_SYMBOLS.items():
+                tile = Tile(x, y, i, color, symbol)
                 self.tile_list.append(tile)
                 x += TILE_WIDTH + 2
 
-                tile = Tile(x, y, i, color, TILE_COLORS_SYMBOLS[color])
+                tile = Tile(x, y, i, color, symbol)
                 self.tile_list.append(tile)
                 x += TILE_WIDTH + 2
 
@@ -204,7 +207,7 @@ class GameView(arcade.View):
                 available_slots.append(disc)
 
         # Snap tile to the closest stand slot
-        if (len(self.held_tiles) > 0):
+        if len(self.held_tiles) > 0:
             self.snap(self.held_tiles[0], self.stand_slot_list)
 
         # Drop card from held tiles
@@ -228,10 +231,11 @@ class GameView(arcade.View):
         # Loop through all stand slots and find the closest distance to tile
         for slot in selected_list:
             # Using Euclidean distance formula to find the closest stand slot
-            difference = math.sqrt((slot.center_x - tile.center_x) ** 2 + (slot.center_y - tile.center_y) ** 2)
+            difference = math.sqrt((slot.center_x - tile.center_x) ** 2 +
+                                   (slot.center_y - tile.center_y) ** 2)
 
             # Update current best if distance is less than it
-            if difference < current_best and slot.holding_tile != True:
+            if difference < current_best and slot.holding_tile is not True:
                 current_best = difference
                 best_slot = slot
 
