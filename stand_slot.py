@@ -1,6 +1,8 @@
 import arcade
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 
+DIVIDER_GAP = 5
+
 class Stand_Slot:
     def __init__(self, x, y, color):
         self.center_x = x

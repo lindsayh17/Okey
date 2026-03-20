@@ -2,7 +2,7 @@ import math
 import arcade
 from com import Com, COM_WIDTH
 from gui_draw_pile import GuiDrawPile
-from stand_slot import Stand_Slot
+from stand_slot import Stand_Slot, DIVIDER_GAP
 from engine.game import Game
 from engine.tile import Tile, TILE_WIDTH, TILE_HEIGHT, TILE_COLORS_SYMBOLS
 import assets.colors as colr
@@ -30,9 +30,11 @@ class GameView(arcade.View):
 
         # Non-sprite lists
         self.stand_slot_list = []
+        self.com_stand_slot_list = []
 
         # Stand specifications
         self.stand_start_x = 0
+        self.com_stand_start_x = 0
         self.stand_divider = 5
         self.rows = 2
         self.columns = 12
@@ -65,6 +67,9 @@ class GameView(arcade.View):
         self.setup_coms()
         # Draw pile coordinates
         self.setup_draw_pile()
+
+        # Com hand display tracker
+        self.com_displaying_hand = None
 
         # TODO: maybe separate this out into another file
         # create tiles
@@ -101,7 +106,7 @@ class GameView(arcade.View):
         # draw stand line divider
         arcade.draw_lbwh_rectangle_filled(
             self.stand_start_x - TILE_WIDTH / 2,
-            TILE_HEIGHT,
+            (TILE_HEIGHT + DIVIDER_GAP / 2) - self.stand_divider / 2,
             self.total_stand_width,
             self.stand_divider,
             arcade.color.DEEP_COFFEE,
@@ -115,11 +120,25 @@ class GameView(arcade.View):
         # Draw discard piles
         for disc in self.game.discards:
             disc.draw()
+
         # Draw draw pile
         self.draw_pile.draw()
         # Update text to show count of deck
         self.draw_pile_label.text = str(self.game.draw_pile.count())
         self.draw_pile_label.draw()
+
+        if self.com_displaying_hand is not None:
+            for slot in self.com_stand_slot_list:
+                slot.draw()
+
+                # draw stand line divider
+                arcade.draw_lbwh_rectangle_filled(
+                    self.com_stand_start_x - TILE_WIDTH / 2,
+                    (self.height / 2) + TILE_HEIGHT + DIVIDER_GAP - self.stand_divider / 2,
+                    self.total_stand_width,
+                    self.stand_divider,
+                    arcade.color.DEEP_COFFEE,
+                )
 
         for tile in self.tile_list:
             tile.set_face_up()
@@ -134,7 +153,7 @@ class GameView(arcade.View):
 
         # 2 rows in the tile stand
         for row in range(self.rows):
-            stand_y = (TILE_HEIGHT / 2) + row * TILE_HEIGHT
+            stand_y = (TILE_HEIGHT / 2) + row * (TILE_HEIGHT + DIVIDER_GAP)
             # 12 slots on each row
             for column in range(self.columns):
                 # stand_slot position
@@ -158,9 +177,9 @@ class GameView(arcade.View):
         com3_y = screen_height / 2
 
         # Make each com
-        com1 = Com(com1_x, com1_y, arcade.color.RED, "Com 1", self.game.discards[1])
-        com2 = Com(com2_x, com2_y, arcade.color.YELLOW, "Com 2", self.game.discards[2])
-        com3 = Com(com3_x, com3_y, arcade.color.BLUE, "Com 3", self.game.discards[3])
+        com1 = Com(com1_x, com1_y, arcade.color.RED, "Com 1", self.game.players[1])
+        com2 = Com(com2_x, com2_y, arcade.color.YELLOW, "Com 2", self.game.players[2])
+        com3 = Com(com3_x, com3_y, arcade.color.BLUE, "Com 3", self.game.players[3])
 
         # Add each com to the list
         self.com_list.append(com1)
@@ -276,6 +295,23 @@ class GameView(arcade.View):
                     self.tile_list.append(top_tile)
                     return
 
+        # Check if clicked on com
+        for com in self.com_list:
+            # TODO: Once a boolean for player being open, add and statement to check
+            if com.collides_with_point((x, y)):
+                # Turn hand display off
+                if self.com_displaying_hand == com:
+                    self.com_displaying_hand = None
+
+                    # Delete saved display hand
+                    self.com_stand_slots.clear()
+                else:
+                    # Display hand
+                    self.com_displaying_hand = com
+                    self.setup_com_stand(com)
+
+                return
+
     def on_mouse_release(self, x, y, button, modifiers):
 
         # If no cards are being held, return
@@ -333,3 +369,21 @@ class GameView(arcade.View):
                 previous_slot.holding_tile = False
 
             tile.current_slot_location = best_slot
+
+    def setup_com_stand(self, com):
+        # Coordinates of the stand based on the size of the screen
+        self.com_stand_start_x = (self.width - self.total_stand_width) / 2 + TILE_WIDTH / 2
+
+        # 2 rows in the tile stand
+        for row in range(self.rows):
+            stand_y = (self.height / 2) + row * TILE_HEIGHT + DIVIDER_GAP
+            # 12 slots on each row
+            for column in range(self.columns):
+                # stand_slot position
+                stand_x = self.com_stand_start_x + column * TILE_WIDTH
+
+                # create stand_slot and append to the slot list
+                stand_slot = Stand_Slot(stand_x, stand_y, arcade.color.BEAVER)
+                self.com_stand_slot_list.append(stand_slot)
+
+        # Insert tiles onto stand
