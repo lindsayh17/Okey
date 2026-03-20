@@ -43,6 +43,8 @@ class GameView(arcade.View):
         self.draw_pile = None
         self.draw_pile_label = None
 
+        self.player_discard = None
+
         self.player_hand = None
 
     # Set up game
@@ -156,11 +158,17 @@ class GameView(arcade.View):
         com3_y = screen_height / 2
 
         # Make each com
+<<<<<<< HEAD
         com1 = Com(com1_x, com1_y, arcade.color.RED, "Com 1")
         com2 = Com(com2_x, com2_y, arcade.color.YELLOW, "Com 2")
         com3 = Com(com3_x, com3_y, arcade.color.BLUE, "Com 3")
 
         # Make com1 the discard player can access
+=======
+        com1 = Com(com1_x, com1_y, arcade.color.RED, "Com 1", self.game.discards[1])
+        com2 = Com(com2_x, com2_y, arcade.color.YELLOW, "Com 2", self.game.discards[2])
+        com3 = Com(com3_x, com3_y, arcade.color.BLUE, "Com 3", self.game.discards[3])
+>>>>>>> draw-pile
 
         # Add each com to the list
         self.com_list.append(com1)
@@ -199,6 +207,10 @@ class GameView(arcade.View):
             anchor_y="center",
         )
 
+    # Discard setup
+    def setup_discard(self, player):
+        pass
+
     # Resize window
     def on_resize(self, width, height):
         super().on_resize(width, height)
@@ -220,11 +232,12 @@ class GameView(arcade.View):
             # Initial check if player has drawn already this round
             if self.game.players[0].drawn:
                 return
+            self.game.players[0].drawn = True
 
             # Draw top tile from draw pile
-            if self.game.draw_pile.count() > 0 and not self.game.players[0].drawn:
+            if self.game.draw_pile.count() > 0:
                 # Add tile to players logic hand
-                print("drawn")
+                print("drawn from draw pile")
                 self.game.players[0].drawn = True
 
                 top_tile = self.game.draw_pile.draw()
@@ -239,6 +252,37 @@ class GameView(arcade.View):
                         top_tile.current_slot_location = slot
                         break
                 self.tile_list.append(top_tile)
+            return
+
+        # Check if discard player accesses was clicked
+        for discard in self.game.discards:
+            # Check if clicked on discard not for player to access
+            if discard.collides_with_point((x, y)):
+                if not discard.player_com_discard:
+                    continue
+                print("drawn from discard pile")
+
+                # Check if player has already drawn
+                if self.game.players[0].drawn:
+                    return
+
+                if discard.count() > 0:
+                    print("drawn from discard pile")
+                    self.game.players[0].drawn = True
+
+                    top_tile = discard.draw_tile()
+                    self.game.players[0].draw_tile(top_tile)
+
+                    # Add tile to gui hand
+                    for slot in self.stand_slot_list:
+                        if not slot.holding_tile:
+                            top_tile.center_x = slot.center_x
+                            top_tile.center_y = slot.center_y
+                            slot.holding_tile = True
+                            top_tile.current_slot_location = slot
+                            break
+                    self.tile_list.append(top_tile)
+                    return
 
     def on_mouse_release(self, x, y, button, modifiers):
 
