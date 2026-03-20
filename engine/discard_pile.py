@@ -2,11 +2,13 @@ import arcade
 
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 
-class DiscardPile:
+class DiscardPile(arcade.Sprite):
     """
     Pile of tiles that a player has discarded
     """
     def __init__(self, x, y, tiles=None):
+        super().__init__(hit_box_algorithm="None")
+
         # list of tiles that are in this discard pile
         if tiles is None:
             tiles = []
@@ -22,6 +24,14 @@ class DiscardPile:
 
         # For when there are tiles to put in the deck
         # self.tiles = arcade.SpriteList()
+
+    def count(self):
+        return len(self.tiles)
+
+    def draw_tiles(self):
+        if len(self.tiles) > 0:
+            return self.tiles.pop()
+        return None
 
     def draw(self):
         arcade.draw_lbwh_rectangle_outline(

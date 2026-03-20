@@ -17,10 +17,16 @@ class Game:
         self.window_height = window_height
 
         self.discards = self.discard_setup()
+
+        # To note what discard pile player can access
+        self.discards[1].player_com_discard = True
+
         self.players = [Player(self.discards[0], self.enter_player_name(), False),
                         Player(self.discards[1],"Com_1", True),
                         Player(self.discards[2],"Com_2", True),
                         Player(self.discards[3],"Com_3", True)]
+
+
 
         # TODO: allow someone to pick their own name
         # TODO: generate fun computer names

@@ -3,7 +3,7 @@ import arcade
 COM_WIDTH = 75
 
 class Com(arcade.Sprite):
-    def __init__(self, x, y, color, name):
+    def __init__(self, x, y, color, name, discard):
         super().__init__(hit_box_algorithm="None")
 
         self.center_x = x
