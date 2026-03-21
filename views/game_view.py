@@ -23,7 +23,6 @@ class GameView(arcade.View):
         # Sprite list goes here
         self.com_list = arcade.SpriteList()
         self.tile_list = arcade.SpriteList()
-        self.stand_tiles = arcade.SpriteList()
 
         # com text
         self.com_labels = []
@@ -76,12 +75,7 @@ class GameView(arcade.View):
     def on_draw(self):
         self.clear()
 
-        # draw tiles on stand
-        for player in self.game.players:
-            for tile in player.hand:
-                tile.draw()
-
-        # Draw stand
+        # Draw stand slots
         for stand in self.stand_slot_list:
             stand.draw()
 
@@ -93,6 +87,10 @@ class GameView(arcade.View):
             self.stand_divider,
             arcade.color.DEEP_COFFEE,
         )
+
+        # Draw tiles
+        for tile in self.tile_list:
+            tile.draw()
 
         # Draw coms
         self.com_list.draw()
@@ -128,7 +126,10 @@ class GameView(arcade.View):
 
     def setup_player_tiles(self):
         for i, tile in enumerate(self.game.players[0].hand):
-            self.stand_slot_list[i].set_tile(tile)
+            tile.set_curr_slot(self.stand_slot_list[i])
+            self.stand_slot_list[i].holding_tile = True
+            tile.set_face_up()
+            self.tile_list.append(tile)
 
     # Com setup
     def setup_coms(self):

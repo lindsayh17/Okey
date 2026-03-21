@@ -15,12 +15,6 @@ class Stand_Slot:
         self.holding_tile = False
         self.curr_tile = None
 
-    def set_tile(self, tile):
-        self.curr_tile = tile
-        self.curr_tile.set_face_up()
-        self.curr_tile.center_x = self.center_x
-        self.curr_tile.center_y = self.center_y
-
     def draw(self):
         arcade.draw_lbwh_rectangle_filled(
             self.center_x - TILE_WIDTH / 2,
@@ -29,5 +23,3 @@ class Stand_Slot:
             self.height,
             self.color
         )
-        if self.curr_tile:
-            self.curr_tile.draw()
