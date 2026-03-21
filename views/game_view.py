@@ -2,9 +2,9 @@ import math
 import arcade
 from com import Com, COM_WIDTH
 from gui_draw_pile import GuiDrawPile
-from stand_slot import Stand_Slot
+from stand_slot import StandSlot
 from engine.game import Game
-from engine.tile import Tile, TILE_WIDTH, TILE_HEIGHT, TILE_COLORS_SYMBOLS
+from engine.tile import TILE_WIDTH, TILE_HEIGHT
 import assets.colors as colr
 
 # Game window class
@@ -121,7 +121,7 @@ class GameView(arcade.View):
                 stand_x = self.stand_start_x + column * TILE_WIDTH
 
                 # create stand_slot and append to the slot list
-                stand_slot = Stand_Slot(stand_x, stand_y, arcade.color.BEAVER)
+                stand_slot = StandSlot(stand_x, stand_y, arcade.color.BEAVER)
                 self.stand_slot_list.append(stand_slot)
 
     def setup_player_tiles(self):

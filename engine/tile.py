@@ -5,9 +5,13 @@ from assets.textures import TILE_TEXTURE
 
 TILE_WIDTH = 60
 TILE_HEIGHT = 100
-TILE_COLORS_SYMBOLS = {arcade.color.RED: "♥", arcade.color.BLACK: "■", arcade.color.BLUE: "●", arcade.color.ORANGE: "▲"}
+TILE_COLORS_SYMBOLS = {arcade.color.RED: "♥", arcade.color.BLACK: "■",
+                       arcade.color.BLUE: "●", arcade.color.ORANGE: "▲"}
 
 class Tile(arcade.Sprite):
+    """
+    Holds all information about an individual tile
+    """
     def __init__(self, x, y, value, color, suit, is_joker=False, copy_id = 0, curr_slot = None):
         super().__init__(hit_box_algorithm="None")
 

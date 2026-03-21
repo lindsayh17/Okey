@@ -1,7 +1,10 @@
 import arcade
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 
-class Stand_Slot:
+class StandSlot:
+    """
+    Slots for each spot in the stand
+    """
     def __init__(self, x, y, color):
         self.center_x = x
         self.center_y = y

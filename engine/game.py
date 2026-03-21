@@ -1,7 +1,6 @@
 """
 Controls the main gameplay logic
 """
-from engine.board import Board
 from engine.dealer import Dealer
 from engine.player import Player
 from engine.discard_pile import DiscardPile
