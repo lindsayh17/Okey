@@ -103,6 +103,12 @@ class Tile(arcade.Sprite):
     def get_face_up(self):
         return self.is_face_up
 
+    def set_x(self, val):
+        self.center_x = val
+
+    def set_y(self, val):
+        self.center_y = val
+
     def __repr__(self):
         if self.is_joker:
             return "JOKER"

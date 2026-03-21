@@ -34,7 +34,7 @@ class Game:
         :param starting_player_idx:
         :return:
         """
-
+        # deals cards to the player and computers
         self.board = self.dealer.deal_new_round(self.players, starting_player_idx)
         self.draw_pile = self.board.draw_pile
 
@@ -66,7 +66,7 @@ class Game:
         # TODO: pop-up to ask for player name
         return name
 
-    def play_game(self):
+    def start_game(self):
         """
         Loops through rounds but for now it does just one
         :return:

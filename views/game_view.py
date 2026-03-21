@@ -21,9 +21,9 @@ class GameView(arcade.View):
         self.background_color = colr.THEME_LIGHT_BLUE
 
         # Sprite list goes here
-        # TODO: use the hand from human player as the list of tiles
-        self.tile_list = arcade.SpriteList()
         self.com_list = arcade.SpriteList()
+        self.tile_list = arcade.SpriteList()
+        self.stand_tiles = arcade.SpriteList()
 
         # com text
         self.com_labels = []
@@ -49,12 +49,12 @@ class GameView(arcade.View):
     def setup(self):
         # need to do this here so width and height are set up
         self.game = Game(self.width, self.height)
-        self.game.play_game()
-
+        self.game.start_game()
+        print("Game started")
+        print(self.game.players[0].hand)
 
         # Clear any existing sprites
         self.stand_slot_list.clear()
-        self.tile_list.clear()
         self.com_list.clear()
 
         # Stand coordinates
@@ -64,25 +64,7 @@ class GameView(arcade.View):
         # Draw pile coordinates
         self.setup_draw_pile()
 
-        # TODO: maybe separate this out into another file
-        # create tiles
-        x = 0
-        y = 300
-        for i in range(1, 14):
-            for color, symbol in TILE_COLORS_SYMBOLS.items():
-                tile = Tile(x, y, i, color, symbol)
-                self.tile_list.append(tile)
-                x += TILE_WIDTH + 2
-
-                tile = Tile(x, y, i, color, symbol)
-                self.tile_list.append(tile)
-                x += TILE_WIDTH + 2
-
-        # create jokers
-        for i in range(1, 3):
-            tile = Tile(x, y, "〠", arcade.color.FOREST_GREEN, "⚡", True)
-            self.tile_list.append(tile)
-            x += TILE_WIDTH + 2
+        self.setup_player_tiles()
 
         # player name pop-up
         self.game.enter_player_name()
@@ -91,6 +73,11 @@ class GameView(arcade.View):
     # Screen render that clears the board
     def on_draw(self):
         self.clear()
+
+        # draw tiles on stand
+        for player in self.game.players:
+            for tile in player.hand:
+                tile.draw()
 
         # Draw stand
         for stand in self.stand_slot_list:
@@ -119,11 +106,6 @@ class GameView(arcade.View):
         self.draw_pile_label.text = str(self.game.draw_pile.count())
         self.draw_pile_label.draw()
 
-        for tile in self.tile_list:
-            tile.set_face_up()
-            # Rectangle
-            tile.draw()
-
     def setup_stand(self):
         screen_width = self.width
 
@@ -141,6 +123,10 @@ class GameView(arcade.View):
                 # create stand_slot and append to the slot list
                 stand_slot = Stand_Slot(stand_x, stand_y, arcade.color.BEAVER)
                 self.stand_slot_list.append(stand_slot)
+
+    def setup_player_tiles(self):
+        for i, tile in enumerate(self.game.players[0].hand):
+            self.stand_slot_list[i].set_tile(tile)
 
     # Com setup
     def setup_coms(self):
@@ -161,7 +147,7 @@ class GameView(arcade.View):
         com3 = Com(com3_x, com3_y, arcade.color.BLUE, "Com 3")
 
         # Make com1 the discard player can access
-        com1.player
+        # com1.player
 
         # Add each com to the list
         self.com_list.append(com1)
