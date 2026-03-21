@@ -1,6 +1,8 @@
 import arcade
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 
+DIVIDER_GAP = 5
+
 class StandSlot:
     """
     Slots for each spot in the stand
