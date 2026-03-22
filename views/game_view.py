@@ -6,7 +6,7 @@ from stand_slot import StandSlot, DIVIDER_GAP
 from engine.game import Game
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 import assets.colors as colr
-from ui_components import button
+import ui_components.button as ui_button
 from views.menu_view import MenuView
 
 # Game window class
@@ -51,7 +51,7 @@ class GameView(arcade.View):
         self.player_hand = None
 
         # menu
-        self.menu_button = button.Button(self.window.width * 0.9,
+        self.menu_button = ui_button.Button(self.window.width * 0.9,
                                          self.window.height * 0.9,
                                          self.window.width / 15,
                                          self.window.width / 15,
@@ -382,7 +382,7 @@ class GameView(arcade.View):
 
             tile.current_slot_location = best_slot
 
-    def setup_com_stand(self, com):
+    def setup_com_stand(self):
         # Coordinates of the stand based on the size of the screen
         self.com_stand_start_x = (self.width - self.total_stand_width) / 2 + TILE_WIDTH / 2
 
@@ -397,5 +397,3 @@ class GameView(arcade.View):
                 # create stand_slot and append to the slot list
                 stand_slot = StandSlot(stand_x, stand_y, arcade.color.BEAVER)
                 self.com_stand_slot_list.append(stand_slot)
-
-        # Insert tiles onto stand
