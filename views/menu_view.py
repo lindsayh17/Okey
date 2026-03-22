@@ -7,8 +7,10 @@ class MenuView(arcade.View):
     """
     Start screen of game with "Play" and "Rules" options
     """
-    def __init__(self):
+
+    def __init__(self, game_view):
         super().__init__()
+        self.game_view = game_view
 
         self.title_text = None
         self.close_button = None
@@ -78,18 +80,12 @@ class MenuView(arcade.View):
         self.quit_button.draw()
 
     def on_mouse_press(self, x, y, _button, _modifiers):
-        """ If the user presses the mouse button, start the game. """
-        if self.close_button.button_pressed(x,y):
-            from views.game_view import GameView
-            game_view = GameView()
-            # TODO: this resets the whole game - fix
-            game_view.setup()
-            self.window.show_view(game_view)
+        if self.close_button.button_pressed(x, y):
+            self.window.show_view(self.game_view)
         if self.rules_button.button_pressed(x, y):
             from views.rules_view import RulesView
-            rules_view = RulesView(Views.MENU)
+
+            rules_view = RulesView(Views.MENU, self.game_view)
             self.window.show_view(rules_view)
         if self.quit_button.button_pressed(x, y):
-            from views.title_view import TitleView
-            title_view = TitleView()
-            self.window.show_view(title_view)
+            self.window.show_view(self.window.title_view)

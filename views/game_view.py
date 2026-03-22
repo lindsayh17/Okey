@@ -7,7 +7,6 @@ from engine.game import Game
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 import assets.colors as colr
 import ui_components.button as ui_button
-from views.menu_view import MenuView
 
 # Game window class
 class GameView(arcade.View):
@@ -325,10 +324,10 @@ class GameView(arcade.View):
                     continue
 
         # check if menu was clicked
-        if self.menu_button.button_pressed(x,y):
-            menu_view = MenuView()
-            # TODO: this resets the whole game - fix
-            self.window.show_view(menu_view)
+        if self.menu_button.button_pressed(x, y):
+            from views.menu_view import MenuView
+
+            self.window.show_view(MenuView(self))
 
     def on_mouse_release(self, x, y, button, modifiers):
 
