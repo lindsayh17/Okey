@@ -1,8 +1,5 @@
 import arcade
 from ui_components import button
-from views.game_view import GameView
-from views.rules_view import RulesView
-from views.title_view import TitleView
 import assets.colors as colr
 from assets.utils import Views
 
@@ -83,13 +80,16 @@ class MenuView(arcade.View):
     def on_mouse_press(self, x, y, _button, _modifiers):
         """ If the user presses the mouse button, start the game. """
         if self.close_button.button_pressed(x,y):
+            from views.game_view import GameView
             game_view = GameView()
             # TODO: this resets the whole game - fix
             game_view.setup()
             self.window.show_view(game_view)
         if self.rules_button.button_pressed(x, y):
+            from views.rules_view import RulesView
             rules_view = RulesView(Views.MENU)
             self.window.show_view(rules_view)
         if self.quit_button.button_pressed(x, y):
+            from views.title_view import TitleView
             title_view = TitleView()
             self.window.show_view(title_view)

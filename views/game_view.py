@@ -6,6 +6,8 @@ from stand_slot import StandSlot, DIVIDER_GAP
 from engine.game import Game
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 import assets.colors as colr
+from ui_components import button
+from views.menu_view import MenuView
 
 # Game window class
 class GameView(arcade.View):
@@ -47,6 +49,15 @@ class GameView(arcade.View):
         self.player_discard = None
 
         self.player_hand = None
+
+        # menu
+        self.menu_button = button.Button(self.window.width * 0.9,
+                                         self.window.height * 0.9,
+                                         self.window.width / 15,
+                                         self.window.width / 15,
+                                         "☰",
+                                         colr.THEME_LIGHT_BLUE,
+                                         colr.THEME_DARK_BLUE)
 
     # Set up game
     def setup(self):
@@ -123,6 +134,8 @@ class GameView(arcade.View):
                     self.stand_divider,
                     arcade.color.DEEP_COFFEE,
                 )
+
+        self.menu_button.draw()
 
     def setup_stand(self):
         screen_width = self.width
@@ -304,6 +317,12 @@ class GameView(arcade.View):
                 # If a com that isnt the current displaying hand is clicked
                 if com is not self.com_displaying_hand:
                     continue
+
+        # check if menu was clicked
+        if self.menu_button.button_pressed(x,y):
+            menu_view = MenuView()
+            # TODO: this resets the whole game - fix
+            self.window.show_view(menu_view)
 
     def on_mouse_release(self, x, y, button, modifiers):
 
