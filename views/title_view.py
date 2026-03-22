@@ -1,11 +1,14 @@
 import arcade
-import ui_components.button as button
+from ui_components import button
 from views.game_view import GameView
 from views.rules_view import RulesView
 import assets.colors as colr
 from assets.utils import Views
 
 class TitleView(arcade.View):
+    """
+    Start screen of game with "Play" and "Rules" options
+    """
     def __init__(self):
         super().__init__()
 

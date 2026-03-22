@@ -1,11 +1,15 @@
 import arcade
 
-import ui_components.button as button
+from ui_components import button
 import assets.colors as colr
 from assets.utils import Views
 
 
 class RulesView(arcade.View):
+    """
+    View displaying the game rules.
+    Exits back to previous screen
+    """
     def __init__(self, origin):
         super().__init__()
 
@@ -146,6 +150,7 @@ class RulesView(arcade.View):
         if self.exit_button.button_pressed(x, y):
             match self.origin:
                 case Views.TITLE:
+                    # TODO: ask Jason about this pylint error because otherwise circular import
                     from views.title_view import TitleView
                     next_view = TitleView()
             self.window.show_view(next_view)
