@@ -433,7 +433,7 @@ class GameView(arcade.View):
                 stand_x = self.com_stand_start_x + column * TILE_WIDTH
 
                 # create stand_slot and append to the slot list
-                stand_slot = StandSlot(stand_x, stand_y, arcade.color.BLUE)
+                stand_slot = StandSlot(stand_x, stand_y, arcade.color.GRAY_BLUE)
                 self.com_stand_slot_list.append(stand_slot)
 
         # Insert tiles onto stand
