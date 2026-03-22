@@ -24,9 +24,16 @@ class Player:
         self.drawn = False # Keeps track that one tile has been drawn per round
 
     def draw_tile(self, tile):
+        """
+        Function that adds a tile to a player's hand
+        """
         self.hand.append(tile)
 
     def discard_tile(self, tile):
+        """
+        Removes a tile from the player's hand and
+        puts it in the discard pile
+        '"""
         if tile not in self.hand:
             raise ValueError("Tile not in hand to be discarded")
         self.hand.remove(tile)
@@ -34,10 +41,15 @@ class Player:
         return tile # visible face-up tile discarded
 
     def hand_size(self):
+        """
+        returns number of tiles in the hand
+        """
         return len(self.hand)
 
-    # returns the last visible face-up discarded tile of player
     def top_discard(self):
+        """
+        returns the last visible face-up discarded tile of player
+        """
         if len(self.discard_pile) > 0:
             return self.discard_pile[-1]
         return None
