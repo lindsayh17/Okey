@@ -153,4 +153,10 @@ class RulesView(arcade.View):
                     # TODO: ask Jason about this pylint error because otherwise circular import
                     from views.title_view import TitleView
                     next_view = TitleView()
+                case Views.MENU:
+                    from views.menu_view import MenuView
+                    next_view = MenuView()
+                case _:
+                    from views.menu_view import MenuView
+                    next_view = MenuView()
             self.window.show_view(next_view)

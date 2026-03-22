@@ -6,6 +6,8 @@ from stand_slot import StandSlot, DIVIDER_GAP
 from engine.game import Game
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
 import assets.colors as colr
+import ui_components.button as ui_button
+from views.menu_view import MenuView
 
 # Game window class
 class GameView(arcade.View):
@@ -47,6 +49,15 @@ class GameView(arcade.View):
         self.player_discard = None
 
         self.player_hand = None
+
+        # menu
+        self.menu_button = ui_button.Button(self.window.width * 0.9,
+                                         self.window.height * 0.9,
+                                         self.window.width / 15,
+                                         self.window.width / 15,
+                                         "☰",
+                                         colr.THEME_LIGHT_BLUE,
+                                         colr.THEME_DARK_BLUE)
 
     # Set up game
     def setup(self):
@@ -125,6 +136,8 @@ class GameView(arcade.View):
                     self.stand_divider,
                     arcade.color.DEEP_COFFEE,
                 )
+
+        self.menu_button.draw()
 
     def setup_stand(self):
         screen_width = self.width
@@ -311,6 +324,12 @@ class GameView(arcade.View):
                 if com is not self.com_displaying_hand:
                     continue
 
+        # check if menu was clicked
+        if self.menu_button.button_pressed(x,y):
+            menu_view = MenuView()
+            # TODO: this resets the whole game - fix
+            self.window.show_view(menu_view)
+
     def on_mouse_release(self, x, y, button, modifiers):
 
         # If no cards are being held, return
@@ -369,7 +388,7 @@ class GameView(arcade.View):
 
             tile.current_slot_location = best_slot
 
-    def setup_com_stand(self, com):
+    def setup_com_stand(self):
         # Coordinates of the stand based on the size of the screen
         self.com_stand_start_x = (self.width - self.total_stand_width) / 2 + TILE_WIDTH / 2
 
@@ -384,5 +403,3 @@ class GameView(arcade.View):
                 # create stand_slot and append to the slot list
                 stand_slot = StandSlot(stand_x, stand_y, arcade.color.BEAVER)
                 self.com_stand_slot_list.append(stand_slot)
-
-        # Insert tiles onto stand
