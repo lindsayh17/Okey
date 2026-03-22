@@ -138,6 +138,9 @@ class GameView(arcade.View):
                 # stand_slot position
                 stand_x = self.stand_start_x + column * TILE_WIDTH
 
+                # Debugging output to check coordinates
+                print(f"Stand Slot {row}, {column} at: ({stand_x}, {stand_y})")
+
                 # create stand_slot and append to the slot list
                 stand_slot = StandSlot(stand_x, stand_y, arcade.color.BEAVER)
                 self.stand_slot_list.append(stand_slot)
@@ -217,10 +220,12 @@ class GameView(arcade.View):
     def on_mouse_press(self, x, y, button, modifiers):
         clicked_tiles = arcade.get_sprites_at_point((x, y), self.tile_list)
 
-        # Check if a card had been clicked
+        # Check if a tile had been clicked
         if len(clicked_tiles) > 0:
             self.held_tiles.append(clicked_tiles[0])
             self.pull_to_top(self.held_tiles[0])
+            if clicked_tiles[0] in self.held_tiles:
+                clicked_tiles[0].current_slot.holding_tile = False
             # Return if clicked
             return
 
@@ -337,13 +342,16 @@ class GameView(arcade.View):
     def snap(self, tile, selected_list):
         current_best = 10000
         best_slot = None
-        snap_threshold = 80
+        snap_threshold = 80  # You might adjust this if needed
 
         # Loop through all stand slots and find the closest distance to tile
         for slot in selected_list:
             # Using Euclidean distance formula to find the closest stand slot
             difference = math.sqrt((slot.center_x - tile.center_x) ** 2 +
                                    (slot.center_y - tile.center_y) ** 2)
+
+            # Debugging output to check the distance
+            print(f"Distance to slot ({slot.center_x}, {slot.center_y}): {difference}")
 
             # Update current best if distance is less than it
             if difference < current_best and slot.holding_tile is not True:
