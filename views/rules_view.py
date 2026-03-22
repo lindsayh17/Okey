@@ -75,8 +75,8 @@ class RulesView(arcade.View):
         section_height = self.window.height * 0.22
         left_x = self.window.width / 4
         right_x = self.window.width * 0.75
-        top_y = self.window.height * 0.55
-        bottom_y = self.window.height * 0.25
+        top_y = self.window.height * 0.62
+        bottom_y = self.window.height * 0.32
         sections = [
             (left_x, top_y),
             (right_x, top_y),
@@ -87,10 +87,10 @@ class RulesView(arcade.View):
         # create other text
         for i, sect in enumerate(sections):
             self.rule_sections.append((
-                sect[0],  # center x
-                sect[1],  # center y
-                section_width,
-                section_height
+                sect[0] - section_width/2,  # center x
+                sect[0] + section_width/2,  # center y
+                sect[1] - section_height/2,
+                sect[1] + section_height/2
             ))
 
             self.section_texts.append(
@@ -115,7 +115,7 @@ class RulesView(arcade.View):
             button_width,
             button_height,
             "Exit",
-            colr.THEME_YELLOW,
+            colr.THEME_TEAL,
             colr.THEME_DARK_BLUE
         )
 
@@ -126,12 +126,12 @@ class RulesView(arcade.View):
         self.title_text.draw()
 
         # Draw rectangles
-        for (x, y, w, h) in self.rule_sections:
-            arcade.draw_lrbt_rectangle_filled(
-                x - w / 2,
-                x + w / 2,
-                y - h / 2,
-                y + h / 2,
+        for sect in self.rule_sections:
+            arcade.draw_lrbt_rectangle_outline(
+                sect[0],
+                sect[1],
+                sect[2],
+                sect[3],
                 colr.THEME_TEAL
             )
 
