@@ -1,10 +1,8 @@
 """
 Controls the main gameplay logic
 """
-from engine.board import Board
 from engine.dealer import Dealer
 from engine.player import Player
-from engine.draw_pile import DrawPile
 from engine.discard_pile import DiscardPile
 from engine.tile import TILE_WIDTH
 
@@ -18,21 +16,34 @@ class Game:
         self.window_height = window_height
 
         self.discards = self.discard_setup()
+
+        # To note what discard pile player can access
+        self.discards[1].player_com_discard = True
+
         self.players = [Player(self.discards[0], self.enter_player_name(), False),
                         Player(self.discards[1],"Com_1", True),
                         Player(self.discards[2],"Com_2", True),
                         Player(self.discards[3],"Com_3", True)]
 
+
+
         # TODO: allow someone to pick their own name
         # TODO: generate fun computer names
-        self.board = Board(self.players, 0)
         self.dealer = Dealer()
+        self.board = None
+        self.draw_pile = None
 
-        # initialize a list of tiles
-        self.tiles = self.dealer.build_okey_set()
+    def start_new_round(self, starting_player_idx=0):
+        """
+        Starts a new round
+        :param starting_player_idx:
+        :return:
+        """
+        # deals cards to the player and computers
+        self.board = self.dealer.deal_new_round(self.players, starting_player_idx)
+        self.draw_pile = self.board.draw_pile
 
-        # create draw pile - put all tiles in draw pile for now
-        self.draw_pile = DrawPile(self.tiles)
+
 
     def discard_setup(self):
         """
@@ -60,6 +71,10 @@ class Game:
         # TODO: pop-up to ask for player name
         return name
 
-    def play_game(self):
+    def start_game(self):
+        """
+        Loops through rounds but for now it does just one
+        :return:
+        """
         # TODO: loop continuing to deal new rounds while round is not ended
-        self.dealer.deal_new_round(self.players)
+        self.start_new_round()

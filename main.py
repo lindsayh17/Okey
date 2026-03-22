@@ -5,7 +5,7 @@ def main():
     window = arcade.Window(1000,
             800,
             "Test Game",
-            resizable=True)
+            resizable=False)
     start_view = TitleView()
     window.show_view(start_view)
     arcade.run()
