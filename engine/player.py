@@ -1,4 +1,63 @@
+"""
+Player class handles both human and computer players in the game.
+Each maintaining a hand of tiles, associated discard pile and current
+scores that are dependent on how each evaluates tiles.
+"""
 from collections import defaultdict
+import math
+
+
+# helper function to measure distance between two tiles
+def distance(t1, t2):
+    return math.sqrt(
+        (t1.center_x - t2.center_x) ** 2 +
+        (t1.center_y - t2.center_y) ** 2
+    )
+
+
+# function that finds nearby tiles
+def group_tiles(tiles, threshold = 80):
+    """
+    Go over tiles/hand and create groups from it
+    based on their coordinates (distance)
+    """
+
+    groups = []
+    # to keep track of tiles already grouped
+    visited = set()
+
+    for tile in tiles:
+        # skipping tiles already part of a group
+        if tile in visited:
+            continue
+
+        # Build the group once identified
+        group = []
+        # Begin group search from this tile
+        stack = [tile]
+
+        # find all tiles that are close enough
+        while stack:
+            current = stack.pop()
+            if current in visited:
+                continue
+
+            # mark tile as used and append to current group
+            visited.add(current)
+            group.append(current)
+
+            # check other tiles to see if they belong in this group
+            for other_t in tiles:
+                if other_t not in visited:
+                    if distance(current, other_t) < threshold:
+                        stack.append(other_t)
+
+        # Append to group object list once group is built
+        groups.append(group)
+
+    # once every group is added to the list, return
+    return groups
+
 
 class Player:
     """
@@ -10,16 +69,17 @@ class Player:
         player - tiles shown once player opens
         discard_pile - cards this player has discarded
     """
-    def __init__(self, disc, name, is_player_ai = False): # distinguish human player vs AI player
+    def __init__(self, disc, name, is_player_ai = False):
         self.name = name
-        self.is_player_ai = is_player_ai
+        self.is_player_ai = is_player_ai # distinguish human player vs AI player
         self.hand = [] # every player has a hand of tiles, empty initially
+        self.groups = [] # groups of tiles put together by player, empty initially
         self.played = [] # tiles that are displayed when the player opens
         self.sets_played = [] # sets of tiles out of what the player has opened with
         self.discard_pile = disc # player's discard piles, empty initially
         self.opened = False
         self.stars = 0
-        self.hand_score = 0 #score used for opening
+        self.hand_score = 0 # score used for opening
         self.turn_score = 0 # score during a round that is added to total
         self.total_score = 0 # accumulates over the no. of rounds
         self.drawn = False # Keeps track that one tile has been drawn per round
@@ -155,7 +215,99 @@ class Player:
         # Return score
         return self.hand_score
 
+    # This function calculates hand_score for player
+    # based on physical arrangement/ coordinates
+    def player_get_hand_score(self):
+        """
+        data structure: list of group objects
+        Go over tiles/ hand of the user
+        Create groups based on coordinates
+        Evaluate each group -> set, run
+        Calculate each group's score
+        Returns summed score from all groups evaluated
+        """
+
+        self.hand_score = 0
+
+        # Go over tiles and create groups from it
+        self.groups = group_tiles(self.hand)
+
+        ## print("GROUPS:", [[(t.value, t.color) for t in g] for g in self.groups])
+
+        # Once every group is created
+        for group in self.groups:
+
+            # skip small groups
+            if len(group) < 3:
+                continue
+
+            # extract colors and numbers
+            colors = []
+            numbers = []
+
+            for tile in group:
+                colors.append(tile.color)
+                numbers.append(tile.value)
+
+            # sort to account for a player's disarranged tiles -> 1, 3, 2
+            numbers.sort()
+
+            # -------------------------
+            # CHECK SET - tiles of same number, but
+            #  different color --> 1(red), 1(blue), 1(black)
+            # -------------------------
+
+            # check if all tiles are the same number
+            one_number = len(set(numbers)) == 1
+            # check that are colors are different
+            diff_colors = len(set(colors)) == len(colors)
+
+            if one_number and diff_colors:
+                self.hand_score += sum(numbers)
+                continue
+
+            # -------------------------
+            # CHECK RUN - tiles of same color, but
+            # different number --> 1(red), 2(red), 3(red)
+            # -------------------------
+
+            # check if all tiles are the same color
+            same_color = len(set(colors)) == 1
+
+            # check for consecutive order
+            consecutive_order = True
+            for i in range(len(numbers) - 1):
+                if numbers[i] + 1 != numbers[i + 1]:
+                    consecutive_order = False
+                    break
+
+            if same_color and consecutive_order:
+                self.hand_score += sum(numbers)
+
+        # returns sum group scores of evaluated groups
+        return self.hand_score
+
     # Calculates the turn score after the turn has ended
     def get_turn_score(self):
         self.hand_score += sum(tile.value for tile in self.hand)
         return self.turn_score
+
+
+### Testing player_get_hand_score() and group_tiles()
+class DummyTile:
+    def __init__(self, x, y, color, value):
+        self.center_x = x
+        self.center_y = y
+        self.color = color
+        self.value = value
+
+
+t1 = DummyTile(0, 0, "red", 1)
+t2 = DummyTile(500, 0, "red", 2)
+t3 = DummyTile(20, 0, "red", 3)
+
+player = Player(0, "Joe", False)
+player.hand = [t1, t2, t3]
+
+
+print(player.player_get_hand_score())
