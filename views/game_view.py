@@ -392,11 +392,14 @@ class GameView(arcade.View):
 
         tile = self.held_tiles[0]
 
-        # Add player discard pile to list of slots
+        # Put tile in discard pile
         available_slots = list(self.stand_slot_list)
-        for disc in self.game.discards:
-            if disc.player_discard:
-                available_slots.append(disc)
+        disc = self.game.discards[0]
+        if arcade.check_for_collision(tile, disc):
+            # TODO: prevent someone from picking this back up
+            tile.position = (disc.center_x, disc.center_y)
+            self.held_tiles = []
+            return
 
         # Snap tile to the closest stand slot or a com hand if displayed
         if len(self.held_tiles) > 0:
@@ -409,9 +412,8 @@ class GameView(arcade.View):
                 if tile.current_slot in self.open_stand_slot_list:
                     self.current_open_tiles.append(tile)
                     self.open_window_tiles.append(tile)
-
             else:
-                self.snap(self.held_tiles[0], self.stand_slot_list)
+                self.snap(self.held_tiles[0], available_slots)
 
         # Drop card from held tiles
         self.held_tiles = []
@@ -428,8 +430,6 @@ class GameView(arcade.View):
     # Snap tile to a slot location
     def snap(self, tile, selected_list):
         reset_position = True
-        for s in selected_list:
-            print(s.holding_tile)
 
         # find the closest spot by looping through list
         available_slots = list(selected_list)
@@ -459,8 +459,6 @@ class GameView(arcade.View):
         # if invalid spot reset
         if reset_position:
             tile.position = tile.current_slot.center_x, tile.current_slot.center_y
-
-        self.held_tiles = []
 
     def setup_open_stand(self, player):
         self.open_stand_slot_list.clear()
