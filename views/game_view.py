@@ -363,8 +363,12 @@ class GameView(arcade.View):
             # TODO: Allow snapping to player hand and com hands only if com hand is displayed
             self.snap(self.held_tiles[0], self.stand_slot_list)
 
-        # Drop card from held tiles
+        # Drop tile
         self.held_tiles = []
+
+        # recalculate score after snap
+        score = self.game.players[0].player_get_hand_score()
+        print("New score:", score)
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:
