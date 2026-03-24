@@ -1,4 +1,3 @@
-import math
 import arcade
 from com import Com, COM_WIDTH
 from gui_draw_pile import GuiDrawPile
@@ -84,7 +83,8 @@ class GameView(arcade.View):
 
         # TODO: DELETE THESE TWO LINES, ONLY HERE FOR TESTING PLAYER OPEN
         self.game.players[0].can_open = True
-        self.game.players[0].sets_played = [[1, 2, 3, 4], [4, 4, 4], [9, 10, 11, 12], [1, 1, 1, 1, 1]]
+        self.game.players[0].sets_played = [[1, 2, 3, 4], [4, 4, 4], [9, 10, 11, 12],
+                                            [1, 1, 1, 1, 1]]
 
 
         # Clear any existing sprites
@@ -337,7 +337,8 @@ class GameView(arcade.View):
                     # Display hand
                     self.open_displaying_player = com.player
                     # TODO: Delete this line once we have logic implemented
-                    com.player.sets_played = [[1,2,3,4], [4, 4, 4], [9, 10, 11, 12], [1, 1, 1, 1, 1]]
+                    com.player.sets_played = [[1,2,3,4], [4, 4, 4], [9, 10, 11, 12],
+                                              [1, 1, 1, 1, 1]]
                     self.setup_open_stand(com.player)
                     return
 
@@ -433,7 +434,7 @@ class GameView(arcade.View):
 
         # find the closest spot by looping through list
         available_slots = list(selected_list)
-        slot, distance = arcade.get_closest_sprite(tile, available_slots)
+        slot, _ = arcade.get_closest_sprite(tile, available_slots)
 
         while available_slots and reset_position:
             # if closest slot is empty and tile is on top of it at all, snap
@@ -453,8 +454,7 @@ class GameView(arcade.View):
                 # check for empty response
                 if result is None:
                     break
-                else:
-                    slot, distance = result
+                slot, _ = result
 
         # if invalid spot reset
         if reset_position:
@@ -470,9 +470,10 @@ class GameView(arcade.View):
         start_y = self.total_stand_height + TILE_HEIGHT / 2 + DIVIDER_GAP
 
         # Build as many rows as the player has sets in their open
-        for current_set in range(len(player.sets_played)):
+        for current_set, played_set in enumerate(player.sets_played):
             stand_y = start_y + current_set * (TILE_HEIGHT + 2 * DIVIDER_GAP)
-            # Build as many columns as there are length of the current set + 2 empty slots on either side
+            # Build as many columns as there are length of the current set +
+            # 2 empty slots on either side
             for column in range(len(player.sets_played[current_set]) + 4):
                 # stand_slot position
                 stand_x = self.open_stand_start_x + column * TILE_WIDTH
