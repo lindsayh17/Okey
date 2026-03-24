@@ -17,6 +17,7 @@ class Player:
         self.played = [] # tiles that are displayed when the player opens
         self.sets_played = [] # sets of tiles out of what the player has opened with
         self.discard_pile = disc # player's discard piles, empty initially
+        self.can_open = False
         self.opened = False
         self.stars = 0
         self.hand_score = 0 #score used for opening
