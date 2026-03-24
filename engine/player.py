@@ -1,35 +1,50 @@
 """
 Player class handles both human and computer players in the game.
 Each maintaining a hand of tiles, associated discard pile and current
-scores that are dependent on how each evaluates tiles.
+scores that are dependent on how each evaluate tiles.
 """
+
 from collections import defaultdict
 import math
 
 
-# helper function to measure distance between two tiles
 def distance(t1, t2):
+    """
+    helper function to measure the Euclidean distance
+    between two tiles using their center positions
+    (center_x, center_y) on the screen
+    """
     return math.sqrt(
         (t1.center_x - t2.center_x) ** 2 +
         (t1.center_y - t2.center_y) ** 2
     )
 
 
-def group_tiles(tiles, y_threshold=25):
+def group_tiles(tiles, y_threshold = 25):
+    """
+    Tiles are grouped into rows based on how close they are vertically, Y positions.
+    Horizontal spacing (x) is handled later to split rows into actual tile groups.
+    """
+
+    # list of lists
     groups = []
 
+    # processing tiles from top to bottom - y position
     sorted_tiles = sorted(tiles, key=lambda t: t.center_y)
 
     for tile in sorted_tiles:
         placed = False
 
+        # processing one row at a time
         for group in groups:
-            # check if tile belongs in same row
+            # if tile is close enough vertically, it belongs in same row
             if abs(tile.center_y - group[0].center_y) < y_threshold:
                 group.append(tile)
                 placed = True
                 break
 
+        # If tile not placed, create new row starting with this tile
+        # inside groups
         if not placed:
             groups.append([tile])
 
