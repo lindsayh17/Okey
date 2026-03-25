@@ -1,6 +1,3 @@
-# pylint: skip-file
-
-import math
 import arcade
 from com import Com, COM_WIDTH
 from gui_draw_pile import GuiDrawPile
@@ -37,7 +34,7 @@ class GameView(arcade.View):
 
         # Stand specifications
         self.stand_start_x = 0
-        self.com_stand_start_x = 0
+        self.open_stand_start_x = 0
         self.stand_divider = 5
         self.rows = 2
         self.columns = 12
@@ -52,6 +49,11 @@ class GameView(arcade.View):
 
         self.player_hand = None
 
+        self.open_displaying_player = None
+        self.open_stand_slot_list = []
+        self.current_open_tiles = []
+        self.open_window_tiles = []
+
         # menu
         self.menu_button = ui_button.Button(self.window.width * 0.9,
                                          self.window.height * 0.9,
@@ -61,13 +63,28 @@ class GameView(arcade.View):
                                          colr.THEME_LIGHT_BLUE,
                                          colr.THEME_DARK_BLUE)
 
-        self.com_stand_button = None
+        # open button
+
+        # open button
+        self.open_button = ui_button.Button(self.window.width * 0.07,
+                                            self.window.height * 0.07,
+                                            self.window.width / 6,
+                                            self.window.width / 13,
+                                            "Open",
+                                            colr.THEME_PINK,
+                                            colr.THEME_LIGHT_BLUE)
 
     # Set up game
     def setup(self):
         # need to do this here so width and height are set up
         self.game = Game(self.width, self.height)
         self.game.start_game()
+
+
+        # TODO: DELETE THESE TWO LINES, ONLY HERE FOR TESTING PLAYER OPEN
+        self.game.players[0].can_open = True
+        self.game.players[0].sets_played = [[1, 2, 3, 4], [4, 4, 4], [9, 10, 11, 12],
+                                            [1, 1, 1, 1, 1]]
 
 
         # Clear any existing sprites
@@ -124,7 +141,7 @@ class GameView(arcade.View):
         self.draw_pile_label.text = str(self.game.draw_pile.count())
         self.draw_pile_label.draw()
 
-        if self.com_displaying_hand is not None:
+        if self.open_displaying_player is not None:
             # Draw window box
             arcade.draw_lbwh_rectangle_filled(
                 2 * COM_WIDTH + DIVIDER_GAP,
@@ -135,13 +152,12 @@ class GameView(arcade.View):
             )
 
             # Draw slots
-            for slot in self.com_stand_slot_list:
+            for slot in self.open_stand_slot_list:
                 slot.draw()
 
-            # Draw X button
-            self.com_stand_button.draw()
 
         self.menu_button.draw()
+        self.open_button.draw()
 
         # Draw tiles at end on top of everything.
         for tile in self.tile_list:
@@ -195,15 +211,13 @@ class GameView(arcade.View):
         self.com_list.append(com2)
         self.com_list.append(com3)
 
-
-
         # create labels
         for com in self.com_list:
             # Need to add text to existing sprite square texture
             label = arcade.Text(
                 com.name,
                 com.center_x,
-                com.center_y,
+                com.center_y - COM_WIDTH - 15, # minus 15 for font size
                 arcade.color.WHITE,
                 font_size=15,
                 anchor_x="center",
@@ -246,12 +260,10 @@ class GameView(arcade.View):
         if len(clicked_tiles) > 0:
             self.held_tiles.append(clicked_tiles[0])
             self.pull_to_top(self.held_tiles[0])
-            if clicked_tiles[0] in self.held_tiles:
-                clicked_tiles[0].current_slot.holding_tile = False
             # Return if clicked
             return
 
-        if self.com_displaying_hand is None:
+        if self.open_displaying_player is None:
             # Check if a card had been clicked
             if len(clicked_tiles) > 0:
                 self.held_tiles.append(clicked_tiles[0])
@@ -280,7 +292,7 @@ class GameView(arcade.View):
                         top_tile.center_x = slot.center_x
                         top_tile.center_y = slot.center_y
                         slot.holding_tile = True
-                        top_tile.current_slot_location = slot
+                        top_tile.current_slot = slot
                         top_tile.set_face_up()
                         self.tile_list.append(top_tile)
                         break
@@ -310,7 +322,7 @@ class GameView(arcade.View):
                                 top_tile.center_x = slot.center_x
                                 top_tile.center_y = slot.center_y
                                 slot.holding_tile = True
-                                top_tile.current_slot_location = slot
+                                top_tile.current_slot = slot
                                 break
                         self.tile_list.append(top_tile)
                         return
@@ -321,26 +333,52 @@ class GameView(arcade.View):
             if com.collides_with_point((x, y)):
 
                 # No coms are displaying their hand
-                if self.com_displaying_hand is None:
+                if self.open_displaying_player is None:
                     # Display hand
-                    self.com_displaying_hand = com
+                    self.open_displaying_player = com.player
                     # TODO: Delete this line once we have logic implemented
-                    com.player.sets_played = [[1,2,3,4], [4, 4, 4], [9, 10, 11, 12], [1, 1, 1, 1, 1]]
-                    self.setup_com_stand(com)
+                    com.player.sets_played = [[1,2,3,4], [4, 4, 4], [9, 10, 11, 12],
+                                              [1, 1, 1, 1, 1]]
+                    self.setup_open_stand(com.player)
                     return
 
-                # If a com that isn't the current displaying hand is clicked
-                if com is not self.com_displaying_hand or self.com_displaying_hand:
-                    continue
+                # Closing currently open com window
+                if self.open_displaying_player == com.player:
+                    # Remove tile display with window
+                    for tile in self.open_window_tiles:
+                        if tile in self.tile_list:
+                            self.tile_list.remove(tile)
+                            tile.current_slot = None
+                        else:
+                            continue
+                    self.open_window_tiles.clear()
+                    self.open_stand_slot_list.clear()
+                    self.open_displaying_player = None
+                    return
 
-        # Turn hand display off if pressed x button
-        if self.com_displaying_hand is not None and self.com_stand_button is not None:
-            if self.com_stand_button.button_pressed(x,y):
-                # Delete saved display hand
-                self.com_stand_slot_list.clear()
-                self.com_displaying_hand = None
-                return
-
+        # Check if open button was clicked
+        if self.open_button.button_pressed(x, y) and self.game.players[0].can_open:
+            # See if any open window is displaying
+            if self.open_displaying_player is None:
+                self.open_displaying_player = self.game.players[0]
+                self.setup_open_stand(self.open_displaying_player)
+            # Stop displaying player open window
+            else:
+                # Save tile to open sets list
+                if self.current_open_tiles:
+                    self.open_displaying_player.sets_played.append(self.current_open_tiles.copy())
+                # Remove tile display with window
+                for tile in self.open_window_tiles:
+                    if tile in self.tile_list:
+                        self.tile_list.remove(tile)
+                        tile.current_slot = None
+                    else:
+                        continue
+                self.open_window_tiles.clear()
+                self.current_open_tiles.clear()
+                self.open_stand_slot_list.clear()
+                self.open_displaying_player = None
+            return
 
         # check if menu was clicked
         if self.menu_button.button_pressed(x, y):
@@ -349,28 +387,37 @@ class GameView(arcade.View):
             self.window.show_view(MenuView(self))
 
     def on_mouse_release(self, x, y, button, modifiers):
-
         # If no cards are being held, return
         if len(self.held_tiles) == 0:
             return
 
-        # Add player discard pile to list of slots
+        tile = self.held_tiles[0]
+
+        # Put tile in discard pile
         available_slots = list(self.stand_slot_list)
-        for disc in self.game.discards:
-            if disc.player_discard:
-                available_slots.append(disc)
+        disc = self.game.discards[0]
+        if arcade.check_for_collision(tile, disc):
+            # TODO: prevent someone from picking this back up
+            tile.position = (disc.center_x, disc.center_y)
+            self.held_tiles = []
+            return
 
         # Snap tile to the closest stand slot or a com hand if displayed
         if len(self.held_tiles) > 0:
-            # TODO: Allow snapping to player hand and com hands only if com hand is displayed
-            self.snap(self.held_tiles[0], self.stand_slot_list)
+            # snapping to another open set
+            if self.open_displaying_player is not None:
+                # Combine player stand slots and window slots
+                combined_slots = self.stand_slot_list + self.open_stand_slot_list
+                self.snap(tile, combined_slots)
+                # TODO: check if placing tile matches with set
+                if tile.current_slot in self.open_stand_slot_list:
+                    self.current_open_tiles.append(tile)
+                    self.open_window_tiles.append(tile)
+            else:
+                self.snap(self.held_tiles[0], available_slots)
 
-        # Drop tile
+        # Drop card from held tiles
         self.held_tiles = []
-
-        # recalculate score after snap
-        score = self.game.players[0].player_get_hand_score()
-        print("New score:", score)
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:
@@ -383,63 +430,57 @@ class GameView(arcade.View):
 
     # Snap tile to a slot location
     def snap(self, tile, selected_list):
-        current_best = 10000
-        best_slot = None
-        snap_threshold = 80  # You might adjust this if needed
+        reset_position = True
 
-        # Loop through all stand slots and find the closest distance to tile
-        for slot in selected_list:
-            # Using Euclidean distance formula to find the closest stand slot
-            difference = math.sqrt((slot.center_x - tile.center_x) ** 2 +
-                                   (slot.center_y - tile.center_y) ** 2)
+        # find the closest spot by looping through list
+        available_slots = list(selected_list)
+        slot, _ = arcade.get_closest_sprite(tile, available_slots)
 
-            # Update current best if distance is less than it
-            if difference < current_best and slot.holding_tile is not True:
-                current_best = difference
-                best_slot = slot
+        while available_slots and reset_position:
+            # if closest slot is empty and tile is on top of it at all, snap
+            if not slot.holding_tile and arcade.check_for_collision(tile, slot):
+                tile.position = slot.center_x, slot.center_y
+                slot.holding_tile = True
 
-        # Only snap if there is a best slot and is within the threshold
-        if best_slot is not None and current_best < snap_threshold:
-            tile.center_x = best_slot.center_x
-            tile.center_y = best_slot.center_y
-            best_slot.holding_tile = True
-            # Check if tile was located at another slot previously
-            if tile.current_slot_location is not None:
-                # Get previous slot location and set holding tile to false since the tile is moving
-                previous_slot = tile.current_slot_location
-                previous_slot.holding_tile = False
+                # reset previous slot before changing curr slot to new location
+                tile.current_slot.holding_tile = False
+                tile.current_slot = slot
+                reset_position = False
+            else:
+                # try another slot
+                available_slots.remove(slot)
+                result = arcade.get_closest_sprite(tile, available_slots)
 
-            tile.current_slot_location = best_slot
+                # check for empty response
+                if result is None:
+                    break
+                slot, _ = result
 
-    def setup_com_stand(self, com):
-        self.com_stand_slot_list.clear()
+        # if invalid spot reset
+        if reset_position:
+            tile.position = tile.current_slot.center_x, tile.current_slot.center_y
+
+    def setup_open_stand(self, player):
+        self.open_stand_slot_list.clear()
+        self.current_open_tiles.clear()
 
         # Coordinates of the stand based on the size of the screen
-        self.com_stand_start_x = 2 * COM_WIDTH + DIVIDER_GAP + TILE_WIDTH / 2
+        self.open_stand_start_x = 2 * COM_WIDTH + DIVIDER_GAP + TILE_WIDTH / 2
 
         start_y = self.total_stand_height + TILE_HEIGHT / 2 + DIVIDER_GAP
 
-        button_size = 30
-        self.com_stand_button = ui_button.Button(
-            2 * COM_WIDTH + DIVIDER_GAP + button_size / 2,
-            self.height - (self.total_stand_height - COM_WIDTH) - DIVIDER_GAP,
-            button_size,
-            button_size,
-            "X",
-            arcade.color.RED,
-            arcade.color.BLACK
-        )
-
         # Build as many rows as the player has sets in their open
-        for current_set in range(len(com.player.sets_played)):
+        for current_set, played_set in enumerate(player.sets_played):
             stand_y = start_y + current_set * (TILE_HEIGHT + 2 * DIVIDER_GAP)
-            # Build as many columns as there are length of the current set + 2 empty slots on either side
-            for column in range(len(com.player.sets_played[current_set]) + 4):
+            # Build as many columns as there are length of the current set +
+            # 2 empty slots on either side
+            for column in range(len(player.sets_played[current_set]) + 4):
                 # stand_slot position
-                stand_x = self.com_stand_start_x + column * TILE_WIDTH
+                stand_x = self.open_stand_start_x + column * TILE_WIDTH
 
                 # create stand_slot and append to the slot list
-                stand_slot = StandSlot(stand_x, stand_y, arcade.color.GRAY_BLUE)
-                self.com_stand_slot_list.append(stand_slot)
+                stand_slot = StandSlot(stand_x, stand_y, arcade.color.BLUE)
+                stand_slot.holding_tile = False
+                self.open_stand_slot_list.append(stand_slot)
 
         # Insert tiles onto stand
