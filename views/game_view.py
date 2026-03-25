@@ -202,17 +202,18 @@ class GameView(arcade.View):
         com3_y = screen_height / 2
 
         # Make each com
-        com1 = Com(com1_x, com1_y, arcade.color.RED, "Com 1", self.game.players[1])
-        com2 = Com(com2_x, com2_y, arcade.color.YELLOW, "Com 2", self.game.players[2])
-        com3 = Com(com3_x, com3_y, arcade.color.BLUE, "Com 3", self.game.players[3])
+        com1 = Com(com1_x, com1_y, arcade.color.RED, self.game.players[1])
+        com2 = Com(com2_x, com2_y, arcade.color.YELLOW, self.game.players[2])
+        com3 = Com(com3_x, com3_y, arcade.color.BLUE, self.game.players[3])
 
         # Add each com to the list
         self.com_list.append(com1)
         self.com_list.append(com2)
         self.com_list.append(com3)
 
-        # Run com static method to assign com icons
+        # Run com static method to assign com icons and names
         Com.assign_unique_icons(self.com_list)
+        Com.assign_unique_names(self.com_list)
 
         # create labels
         for com in self.com_list:
