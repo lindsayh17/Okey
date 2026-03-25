@@ -419,6 +419,10 @@ class GameView(arcade.View):
         # Drop card from held tiles
         self.held_tiles = []
 
+        # recalculate score after move
+        score = self.game.players[0].player_get_hand_score()
+        print("New score:", score)
+
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:
             moving_tile.center_x += dx
