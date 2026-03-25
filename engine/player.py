@@ -276,12 +276,9 @@ class Player:
                     continue
 
                 # extract tile values and colors
-                numbers = []
-                colors = []
+                numbers = [t.value for t in subgroup]
+                colors = [t.color for t in subgroup]
 
-                for tile in subgroup:
-                    numbers.append(tile.value)
-                    colors.append(tile.color)
 
                 # -------------------------
                 # CHECK SET +
