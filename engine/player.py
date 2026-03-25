@@ -218,29 +218,27 @@ class Player:
     # based on physical arrangement/ coordinates
     def player_get_hand_score(self):
         """
-        Calculates score based on how tiles are arranged on screen.
-
-        Rules:
         - Tiles are grouped into rows (Y position)
-        - Rows are split into subgroups (X spacing)
-        - Each subgroup must be ENTIRELY a valid:
-            - SET (same number, different colors)
-            - OR RUN (same color, consecutive numbers)
-        - If a subgroup is invalid, it gives 0 points
+        - Rows are split into subgroups (based on X spacing)
+        - Each subgroup must be valid:
+            - SET (same number, different colors) --> 1(red), 1(blue), 1(black)
+            - OR RUN (same color, different numbers) -> 1(red), 2(red), 3(red)
+        - If a subgroup is invalid, gets 0 points
         """
 
         # Reset score every time
         self.hand_score = 0
 
-        # for testing
+        # to track how many valid groups (sets and runs) are found
         valid_group_count = 0
 
-        # Step 1: group tiles into rows
+        # group tiles into rows based on y position
         self.groups = group_tiles(self.hand)
 
         # Loop through each row
         for group in self.groups:
 
+            # skip empty groups
             if not group:
                 continue
 
@@ -248,9 +246,11 @@ class Player:
             group = sorted(group, key=lambda t: t.center_x)
 
             # -------------------------
-            # Step 2: split into subgroups (based on spacing)
+            # Split into subgroups (based on X spacing)
             # -------------------------
             subgroups = []
+
+            # dynamic list that grows and resets
             current_subgroup = [group[0]]
 
             for i in range(1, len(group)):
@@ -263,10 +263,11 @@ class Player:
                 else:
                     current_subgroup.append(curr)
 
+            # Append the last subgroup
             subgroups.append(current_subgroup)
 
             # -------------------------
-            # Step 3: evaluate each subgroup
+            # Test validity of each subgroup
             # -------------------------
             for subgroup in subgroups:
 
@@ -274,15 +275,18 @@ class Player:
                 if len(subgroup) < 3:
                     continue
 
-                numbers = [t.value for t in subgroup]
-                colors = [t.color for t in subgroup]
+                # extract tile values and colors
+                numbers = []
+                colors = []
+
+                for tile in subgroup:
+                    numbers.append(tile.value)
+                    colors.append(tile.color)
 
                 # -------------------------
-                # CHECK SET
-                # Conditions:
+                # CHECK SET +
+                # Other conditions:
                 # - 3 or 4 tiles
-                # - same number
-                # - all colors different
                 # -------------------------
                 same_number = len(set(numbers)) == 1
                 all_diff_colors = len(set(colors)) == len(colors)
@@ -295,25 +299,28 @@ class Player:
 
                 # -------------------------
                 # CHECK RUN
-                # Conditions:
-                # - same color
-                # - consecutive numbers
                 # -------------------------
                 same_color = len(set(colors)) == 1
 
+                # Sort numbers to check sequence order
                 sorted_numbers = sorted(numbers)
 
-                is_consecutive = all(
-                    sorted_numbers[i] + 1 == sorted_numbers[i + 1]
-                    for i in range(len(sorted_numbers) - 1)
-                )
+                # Check if each number increases by 1
+                is_consecutive = True
+                for i in range(len(sorted_numbers) - 1):
+                    if sorted_numbers[i] + 1 != sorted_numbers[i + 1]:
+                        is_consecutive = False
+                        break
 
                 if same_color and is_consecutive:
                     print(f"RUN FOUND: {sorted_numbers}")
                     self.hand_score += sum(sorted_numbers)
                     valid_group_count += 1
 
+        # Debug: show how many valid groups were found
         print("Number of valid groups found:", valid_group_count)
+
+        # Return total score from all valid groups sums
         return self.hand_score
 
     # Calculates the turn score after the turn has ended
@@ -346,4 +353,4 @@ player = Player(0, "Joe", False)
 player.hand = [tile1, tile2, tile3]
 
 
-print(player.player_get_hand_score())
+# print(player.player_get_hand_score())
