@@ -270,6 +270,8 @@ class GameView(arcade.View):
         if len(clicked_tiles) > 0:
             self.held_tiles.append(clicked_tiles[0])
             self.pull_to_top(self.held_tiles[0])
+            # Highlight tile
+            self.held_tiles[0].highlight()
             # Return if clicked
             return
 
@@ -278,6 +280,7 @@ class GameView(arcade.View):
             if len(clicked_tiles) > 0:
                 self.held_tiles.append(clicked_tiles[0])
                 self.pull_to_top(self.held_tiles[0])
+
                 # Return if clicked
                 return
 
@@ -409,6 +412,7 @@ class GameView(arcade.View):
         if arcade.check_for_collision(tile, disc):
             # TODO: prevent someone from picking this back up
             tile.position = (disc.center_x, disc.center_y)
+            tile.unhighlight()
             self.held_tiles = []
             return
 
@@ -425,6 +429,9 @@ class GameView(arcade.View):
                     self.open_window_tiles.append(tile)
             else:
                 self.snap(self.held_tiles[0], available_slots)
+
+        # Unhighlight tile
+        tile.unhighlight()
 
         # Drop card from held tiles
         self.held_tiles = []
