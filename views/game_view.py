@@ -65,13 +65,13 @@ class GameView(arcade.View):
 
         # open button
 
-        # open button
+        # open button, initially set to grey
         self.open_button = ui_button.Button(self.window.width * 0.07,
                                             self.window.height * 0.07,
-                                            self.window.width / 6,
+                                            COM_WIDTH * 2 - (DIVIDER_GAP * 3),
                                             self.window.width / 13,
                                             "Open",
-                                            colr.THEME_PINK,
+                                            arcade.color.GRAY,
                                             colr.THEME_LIGHT_BLUE)
 
     # Set up game
@@ -157,7 +157,13 @@ class GameView(arcade.View):
 
 
         self.menu_button.draw()
-        self.open_button.draw()
+        # Change open button if player can open
+        if self.game.players[0].can_open:
+            self.open_button.set_color(colr.THEME_PINK)
+            self.open_button.draw()
+        else:
+            self.open_button.set_color(arcade.color.GRAY)
+            self.open_button.draw()
 
         # Draw tiles at end on top of everything.
         for tile in self.tile_list:
