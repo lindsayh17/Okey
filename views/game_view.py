@@ -395,10 +395,14 @@ class GameView(arcade.View):
 
         # Put tile in discard pile
         available_slots = list(self.stand_slot_list)
-        disc = self.game.discards[0]
+        # each player has their own discard pile
+        disc = self.game.get_current_player().discard_pile
+        # disc = self.game.discards[0]
         if arcade.check_for_collision(tile, disc):
-            # TODO: prevent someone from picking this back up
+            # prevent someone from picking this back up
             tile.position = (disc.center_x, disc.center_y)
+            print("Tile dropped on discard")
+            self.game.discard_tile(tile)
             self.held_tiles = []
             return
 
@@ -419,9 +423,11 @@ class GameView(arcade.View):
         # Drop card from held tiles
         self.held_tiles = []
 
-        # recalculate score after move
-        score = self.game.players[0].player_get_hand_score()
+        # recalculate score after move for current player
+        player = self.game.get_current_player()
+        score = player.player_get_hand_score()
         print("New score:", score)
+
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:
