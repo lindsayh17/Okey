@@ -14,7 +14,7 @@ NAMES = [
     "Vincent",
     "Cathleen",
     "Sarah",
-    "Esmarelda",
+    "Esmerelda",
     "Alfred",
     "Franklin",
     "Harrison",
