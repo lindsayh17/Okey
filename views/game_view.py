@@ -64,8 +64,6 @@ class GameView(arcade.View):
                                          colr.THEME_LIGHT_BLUE,
                                          colr.THEME_DARK_BLUE)
 
-        # open button
-
         # open button, initially set to grey
         self.open_button = ui_button.Button(self.window.width * 0.93,
                                             self.window.height * 0.07,
@@ -74,6 +72,26 @@ class GameView(arcade.View):
                                          "Open",
                                          arcade.color.GRAY,
                                          colr.THEME_DARK_BLUE)
+
+        # hand score
+        self.score_label = arcade.Text(
+            "Hand Score",
+            self.window.height * 0.03 + self.total_stand_height * 0.75 * 0.5,
+            self.window.height * 0.03 + self.total_stand_height * 0.65,
+            colr.THEME_DARK_BLUE,
+            font_size=15,
+            anchor_x="center",
+            anchor_y="center",
+        )
+        self.score_text = arcade.Text(
+            "0",
+            self.window.height * 0.03 + self.total_stand_height * 0.75 * 0.5,
+            self.window.height * 0.03 + self.total_stand_height * 0.55,
+            colr.THEME_DARK_BLUE,
+            font_size = 20,
+            anchor_x = "center",
+            anchor_y = "center",
+        )
 
     # Set up game
     def setup(self):
@@ -167,7 +185,25 @@ class GameView(arcade.View):
             self.open_button.draw()
 
         # draw hand score
-        arcade.draw_lbwh_rectangle_outline()
+        arcade.draw_lbwh_rectangle_outline(self.window.height * 0.03,
+                                           self.window.height * 0.03,
+                                           self.total_stand_height * 0.75,
+                                           self.total_stand_height * 0.75,
+                                           colr.THEME_DARK_BLUE,
+                                           3.0
+                                           )
+        self.score_label.draw()
+
+        self.score_text = arcade.Text(
+            str(self.game.players[0].get_hand_score()),
+            self.window.height * 0.03 + self.total_stand_height * 0.75 * 0.5,
+            self.window.height * 0.03 + self.total_stand_height * 0.3,
+            colr.THEME_TEAL,
+            font_size=50,
+            anchor_x="center",
+            anchor_y="center",
+        )
+        self.score_text.draw()
 
         # Draw tiles at end on top of everything.
         for tile in self.tile_list:
