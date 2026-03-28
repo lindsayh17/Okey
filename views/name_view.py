@@ -1,11 +1,15 @@
 import arcade
-import arcade.gui as gui
+from arcade import gui
 import assets.colors as colr
-import ui_components.button as button
+from ui_components import button
 from views.game_view import GameView
 
 class NameView(arcade.View):
-
+    """
+    View for users to enter their username.
+    Passes username to the game once the user continues.
+    A username is not required.
+    """
     def __init__(self):
         super().__init__()
         self.manager = gui.UIManager()
