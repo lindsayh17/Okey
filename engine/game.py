@@ -39,8 +39,6 @@ class Game:
     def start_new_round(self, starting_player_idx=0):
         """
         Starts a new round
-        :param starting_player_idx:
-        :return:
         """
         # Dealer deals cards to the player and computers after
         # building tiles and randomizing. Returns remaining draw pile.
@@ -55,7 +53,6 @@ class Game:
         # first player starts with 15, no draw here
         self.must_draw = False
         self.turn_ended = False
-        self.must_draw = True
         # print(f"\n *** NEW ROUND ***")
         # print(f"Starting player: {self.players[self.current_player_idx].name}")
 
@@ -154,6 +151,9 @@ class Game:
 
         # after drawing, must discard
         self.must_draw = False
+
+        self.turn_ended = False
+
         print(f"{player.name} drew {tile.value} from middle pile")
 
         return tile
@@ -184,6 +184,7 @@ class Game:
         # update state
         player.drawn = True
         self.must_draw = False
+        self.turn_ended = False
 
         print(f"{player.name} drew {tile.value} from discard pile")
 
@@ -194,6 +195,8 @@ class Game:
         Finalizes the turn of a player by validating rules.
         Locks player's arranged valid tile groupings
         """
+        self.turn_ended = True
+
         player = self.get_current_player()
 
         # validate that player indeed discarded
@@ -214,32 +217,38 @@ class Game:
         self.must_draw = True
 
         print(f"Next player's turn: {self.get_current_player().name}")
-        self.turn_ended = False
         self.debug_state()
 
     def debug_state(self):
         """
-        Prints full game state in a clean, readable format
+        Prints game state in readable format
         """
 
         print("\n========== GAME STATE ==========")
 
-        print("\n--- PLAYERS ---")
+        current_idx = self.current_player_idx
+        current_player = self.get_current_player()
 
-        for i, player in enumerate(self.players):
-            marker = " <-- CURRENT" if i == self.current_player_idx else ""
+        # Focus more on human player (index 0)
+        player = self.players[0]
 
-            print(f"[{i}] {player.name}{marker}")
+        print(f"\n--- Player [0] {player.name} ---")
+        print(f"Hand Size: {len(player.hand)}")
+        print(f"Drawn This Turn: {player.drawn}")
 
-            print(f"   Hand Size: {len(player.hand)}")
-            print(f"   Drawn This Turn: {player.drawn}")
+        # Scores
+        arranged_score = player.player_get_hand_score()
+        print(f"GUI tile arrangement Score: {arranged_score}")
+        print(f"Locked Score: {player.locked_score}")
 
-            # Scores
-            arranged_score = player.player_get_hand_score()
-            logic_score = player.get_hand_score()
+        # Discard
+        if player.discard_pile.tiles:
+            top_tile = player.discard_pile.tiles[-1]
+            print(f"Top Discard: {top_tile.value}")
+        else:
+            print("Top Discard: None")
 
-            print(f"   Arranged Score (GUI grouping): {arranged_score}")
-            print(f"   Locked Score: {player.locked_score}")
+        print(f"Turn Ended: {self.turn_ended}")
 
         # Draw pile
         if self.draw_pile:
