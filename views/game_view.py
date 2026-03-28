@@ -205,7 +205,7 @@ class GameView(arcade.View):
         self.score_label.draw()
 
         self.score_text = arcade.Text(
-            str(self.game.players[0].get_hand_score()),
+            str(self.game.players[0].player_get_hand_score()),
             self.window.height * 0.03 + self.total_stand_height * 0.75 * 0.5,
             self.window.height * 0.03 + self.total_stand_height * 0.3,
             colr.THEME_TEAL,
