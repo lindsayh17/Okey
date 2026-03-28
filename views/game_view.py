@@ -462,40 +462,33 @@ class GameView(arcade.View):
         player = self.game.get_current_player()
         disc = player.discard_pile
 
-        # if tile was placed on discard and dragged away, then return to hand
+        # remove tile from discard list if was in disc
         if tile in disc.tiles and not arcade.check_for_collision(tile, disc):
-            disc.tiles.clear()
-            if tile not in player.hand:
-                player.hand.append(tile)
-            print("Returning tile from discard back to hand")
+            disc.tiles.remove(tile)
 
-        # if tile was placed on discard only, keep it there visually
-        if arcade.check_for_collision(tile, disc):
-            tile.position = (disc.center_x, disc.center_y)
-
-            # show only the top discarded tile visually
-            disc.tiles.clear()
-            disc.tiles.append(tile)
-
-            print(f"Tile dropped on discard: {tile.value}")
-
-            self.held_tiles = []
-            tile.unhighlight()
-            self.score = self.game.get_current_player().player_get_hand_score()
-            return
-
-        # Put tile in stand/open slots
+        # get set of slots
         available_slots = list(self.stand_slot_list)
         if self.open_displaying_player is not None:
             available_slots = self.stand_slot_list + self.open_stand_slot_list
 
-        if self.open_displaying_player is not None:
+        # Snap tile to the closest stand slot or a com hand if displayed
+        # check if tile touching slot
+        touching_slot = None
+        for slot in available_slots:
+            if not slot.holding_tile and arcade.check_for_collision(tile, slot):
+                touching_slot = slot
+                break
+
+        if touching_slot:
             self.snap(tile, available_slots)
-            if tile.current_slot in self.open_stand_slot_list:
-                if tile not in self.current_open_tiles:
-                    self.current_open_tiles.append(tile)
-                if tile not in self.open_window_tiles:
-                    self.open_window_tiles.append(tile)
+            if touching_slot in self.open_stand_slot_list:
+                self.current_open_tiles.append(tile)
+                self.open_window_tiles.append(tile)
+            if tile not in player.hand:
+                player.hand.append(tile)
+        elif arcade.check_for_collision(tile, disc):
+            self.snap(tile, [disc])
+            disc.tiles.append(tile)
         else:
             self.snap(tile, available_slots)
 
