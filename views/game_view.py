@@ -12,11 +12,12 @@ class GameView(arcade.View):
     """
     Main view for the program as the game is being played
     """
-    def __init__(self):
+    def __init__(self, player_name):
         super().__init__()
 
         # create a new game
         self.game = None
+        self.player_name = player_name
 
         self.background_color = colr.THEME_LIGHT_BLUE
 
@@ -63,21 +64,42 @@ class GameView(arcade.View):
                                          colr.THEME_LIGHT_BLUE,
                                          colr.THEME_DARK_BLUE)
 
-        # open button
-
-        # open button
-        self.open_button = ui_button.Button(self.window.width * 0.07,
+        # open button, initially set to grey
+        self.open_button = ui_button.Button(self.window.width * 0.9,
                                             self.window.height * 0.07,
-                                            self.window.width / 6,
-                                            self.window.width / 13,
-                                            "Open",
+                                         self.window.width / 5,
+                                         self.window.height / 12,
+                                         "Open",
+                                         arcade.color.GRAY,
+                                         colr.THEME_DARK_BLUE)
+
+        # hand score
+        self.score_label = arcade.Text(
+            "Hand Score",
+            self.window.height * 0.03 + self.total_stand_height * 0.75 * 0.5,
+            self.window.height * 0.03 + self.total_stand_height * 0.65,
+            colr.THEME_DARK_BLUE,
+            font_size=15,
+            anchor_x="center",
+            anchor_y="center",
+        )
+        self.score = 0
+
+        # end turn button
+        self.end_turn_button = ui_button.Button(self.window.width * 0.9,
+                                            self.window.height * 0.07 + self.window.height / 11,
+                                                self.window.width / 5,
+                                                self.window.height / 12,
+                                            "End Turn",
                                             colr.THEME_PINK,
-                                            colr.THEME_LIGHT_BLUE)
+                                            colr.THEME_DARK_BLUE)
+
 
     # Set up game
     def setup(self):
         # need to do this here so width and height are set up
         self.game = Game(self.width, self.height)
+        self.game.set_player_name(self.player_name)
         self.game.start_game()
 
 
@@ -157,7 +179,35 @@ class GameView(arcade.View):
 
 
         self.menu_button.draw()
-        self.open_button.draw()
+        # Change open button if player can open
+        if self.game.players[0].can_open:
+            self.open_button.set_color(colr.THEME_YELLOW)
+            self.open_button.draw()
+        else:
+            self.open_button.set_color(arcade.color.GRAY)
+            self.open_button.draw()
+
+        # draw hand score
+        arcade.draw_lbwh_rectangle_outline(self.window.height * 0.03,
+                                           self.window.height * 0.03,
+                                           self.total_stand_height * 0.75,
+                                           self.total_stand_height * 0.75,
+                                           colr.THEME_DARK_BLUE,
+                                           3.0
+                                           )
+        self.score_label.draw()
+
+        score_text = arcade.Text(
+            str(self.score),
+            self.window.height * 0.03 + self.total_stand_height * 0.75 * 0.5,
+            self.window.height * 0.03 + self.total_stand_height * 0.3,
+            colr.THEME_TEAL,
+            font_size=50,
+            anchor_x="center",
+            anchor_y="center",
+        )
+        score_text.draw()
+        self.end_turn_button.draw()
 
         # Draw tiles at end on top of everything.
         for tile in self.tile_list:
@@ -202,14 +252,18 @@ class GameView(arcade.View):
         com3_y = screen_height / 2
 
         # Make each com
-        com1 = Com(com1_x, com1_y, arcade.color.RED, "Com 1", self.game.players[1])
-        com2 = Com(com2_x, com2_y, arcade.color.YELLOW, "Com 2", self.game.players[2])
-        com3 = Com(com3_x, com3_y, arcade.color.BLUE, "Com 3", self.game.players[3])
+        com1 = Com(com1_x, com1_y, arcade.color.RED, self.game.players[1])
+        com2 = Com(com2_x, com2_y, arcade.color.YELLOW, self.game.players[2])
+        com3 = Com(com3_x, com3_y, arcade.color.BLUE, self.game.players[3])
 
         # Add each com to the list
         self.com_list.append(com1)
         self.com_list.append(com2)
         self.com_list.append(com3)
+
+        # Run com static method to assign com icons and names
+        Com.assign_unique_icons(self.com_list)
+        Com.assign_unique_names(self.com_list)
 
         # create labels
         for com in self.com_list:
@@ -260,6 +314,8 @@ class GameView(arcade.View):
         if len(clicked_tiles) > 0:
             self.held_tiles.append(clicked_tiles[0])
             self.pull_to_top(self.held_tiles[0])
+            # Highlight tile
+            self.held_tiles[0].highlight()
             # Return if clicked
             return
 
@@ -268,23 +324,18 @@ class GameView(arcade.View):
             if len(clicked_tiles) > 0:
                 self.held_tiles.append(clicked_tiles[0])
                 self.pull_to_top(self.held_tiles[0])
+
                 # Return if clicked
                 return
 
             # Check if draw pile was clicked
             if self.draw_pile.collides_with_point((x, y)):
-                # Initial check if player has drawn already this round
-                if self.game.players[0].drawn:
+                # make Game handle draw logic
+                top_tile = self.game.draw_tile()
+                # if draw not allowed, stop
+                if top_tile is None:
                     return
-
-                # Draw top tile from draw pile
-                if self.game.draw_pile.count() > 0:
-                    # Add tile to players logic hand
-                    print("drawn from draw pile")
-                    self.game.players[0].drawn = True
-
-                    top_tile = self.game.draw_pile.draw()
-                    self.game.players[0].draw_tile(top_tile)
+                print("Tile drawn from draw pile")
 
                 # Add tile to gui hand
                 for slot in self.stand_slot_list:
@@ -296,36 +347,28 @@ class GameView(arcade.View):
                         top_tile.set_face_up()
                         self.tile_list.append(top_tile)
                         break
-
+                return
             # Check if discard player accesses was clicked
             for discard in self.game.discards:
                 # Check if clicked on discard not for player to access
                 if discard.collides_with_point((x, y)):
                     if not discard.player_com_discard:
                         continue
+                    top_tile = self.game.draw_from_discard(discard)
+                    if top_tile is None:
+                        return
                     print("drawn from discard pile")
 
-                    # Check if player has already drawn
-                    if self.game.players[0].drawn:
-                        return
-
-                    if discard.count() > 0:
-                        print("drawn from discard pile")
-                        self.game.players[0].drawn = True
-
-                        top_tile = discard.draw_tile()
-                        self.game.players[0].draw_tile(top_tile)
-
-                        # Add tile to gui hand
-                        for slot in self.stand_slot_list:
-                            if not slot.holding_tile:
-                                top_tile.center_x = slot.center_x
-                                top_tile.center_y = slot.center_y
-                                slot.holding_tile = True
-                                top_tile.current_slot = slot
-                                break
-                        self.tile_list.append(top_tile)
-                        return
+                    # Add tile to gui hand
+                    for slot in self.stand_slot_list:
+                        if not slot.holding_tile:
+                            top_tile.center_x = slot.center_x
+                            top_tile.center_y = slot.center_y
+                            slot.holding_tile = True
+                            top_tile.current_slot = slot
+                            break
+                    self.tile_list.append(top_tile)
+                    return
 
         # Check if clicked on com
         for com in self.com_list:
@@ -380,6 +423,11 @@ class GameView(arcade.View):
                 self.open_displaying_player = None
             return
 
+        # Check if end_turn button was clicked
+        if self.end_turn_button.button_pressed(x, y):
+            self.game.end_turn()
+
+
         # check if menu was clicked
         if self.menu_button.button_pressed(x, y):
             from views.menu_view import MenuView
@@ -393,31 +441,38 @@ class GameView(arcade.View):
 
         tile = self.held_tiles[0]
 
-        # Put tile in discard pile
-        available_slots = list(self.stand_slot_list)
+        # Get discard pile
         disc = self.game.discards[0]
-        if arcade.check_for_collision(tile, disc):
-            # TODO: prevent someone from picking this back up
-            tile.position = (disc.center_x, disc.center_y)
-            self.held_tiles = []
-            return
+
+        # get set of slots
+        available_slots = list(self.stand_slot_list)
+        if self.open_displaying_player is not None:
+            available_slots = self.stand_slot_list + self.open_stand_slot_list
 
         # Snap tile to the closest stand slot or a com hand if displayed
-        if len(self.held_tiles) > 0:
-            # snapping to another open set
-            if self.open_displaying_player is not None:
-                # Combine player stand slots and window slots
-                combined_slots = self.stand_slot_list + self.open_stand_slot_list
-                self.snap(tile, combined_slots)
-                # TODO: check if placing tile matches with set
-                if tile.current_slot in self.open_stand_slot_list:
-                    self.current_open_tiles.append(tile)
-                    self.open_window_tiles.append(tile)
-            else:
-                self.snap(self.held_tiles[0], available_slots)
+        # check if tile touching slot
+        touching_slot = None
+        for slot in available_slots:
+            if not slot.holding_tile and arcade.check_for_collision(tile, slot):
+                touching_slot = slot
+                break
 
-        # Drop card from held tiles
+        if touching_slot:
+            self.snap(tile, available_slots)
+            if touching_slot in self.open_stand_slot_list:
+                self.current_open_tiles.append(tile)
+                self.open_window_tiles.append(tile)
+        elif arcade.check_for_collision(tile, disc):
+            # TODO: prevent someone from picking this back up
+            # tile.position = (disc.center_x, disc.center_y)
+            self.snap(tile, [disc])
+        else:
+            # return tile to original position
+            self.snap(tile, available_slots)
+
         self.held_tiles = []
+        tile.unhighlight()
+        self.score = self.game.players[0].player_get_hand_score()
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:
@@ -470,7 +525,7 @@ class GameView(arcade.View):
         start_y = self.total_stand_height + TILE_HEIGHT / 2 + DIVIDER_GAP
 
         # Build as many rows as the player has sets in their open
-        for current_set, played_set in enumerate(player.sets_played):
+        for current_set, _ in enumerate(player.sets_played):
             stand_y = start_y + current_set * (TILE_HEIGHT + 2 * DIVIDER_GAP)
             # Build as many columns as there are length of the current set +
             # 2 empty slots on either side
