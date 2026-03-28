@@ -34,6 +34,7 @@ class Game:
         self.current_player_idx = 0 # to track turn of player
         self.last_discard = None # track most recently discarded tile
         self.must_draw = False # check if player must draw before discarding
+        self.turn_ended = False # to track if discard is finalized
 
     def start_new_round(self, starting_player_idx=0):
         """
@@ -53,7 +54,8 @@ class Game:
 
         # first player starts with 15, no draw here
         self.must_draw = False
-
+        self.turn_ended = False
+        self.must_draw = True
         # print(f"\n *** NEW ROUND ***")
         # print(f"Starting player: {self.players[self.current_player_idx].name}")
 
@@ -212,61 +214,35 @@ class Game:
         self.must_draw = True
 
         print(f"Next player's turn: {self.get_current_player().name}")
+        self.turn_ended = False
         self.debug_state()
 
+    def debug_state(self):
+        """
+        Prints full game state in a clean, readable format
+        """
 
-def debug_state(self):
-    """
-    Prints full game state in a clean, readable format
-    """
+        print("\n========== GAME STATE ==========")
 
-    print("\n========== GAME STATE ==========")
+        print("\n--- PLAYERS ---")
 
-    # Last action
-    print(f"Last Action: {self.last_action}")
+        for i, player in enumerate(self.players):
+            marker = " <-- CURRENT" if i == self.current_player_idx else ""
 
-    # Turn info
-    print(f"Current Player Index: {self.current_player_idx}")
-    print(f"Current Player: {self.get_current_player().name}")
-    print(f"Must Draw: {self.must_draw}")
+            print(f"[{i}] {player.name}{marker}")
 
-    if self.last_discard:
-        print(f"Last Discard Tile: {self.last_discard.value} ({self.last_discard.color})")
-    else:
-        print("Last Discard Tile: None")
+            print(f"   Hand Size: {len(player.hand)}")
+            print(f"   Drawn This Turn: {player.drawn}")
 
-    print("\n--- PLAYERS ---")
+            # Scores
+            arranged_score = player.player_get_hand_score()
+            logic_score = player.get_hand_score()
 
-    for i, player in enumerate(self.players):
-        marker = " <-- CURRENT" if i == self.current_player_idx else ""
+            print(f"   Arranged Score (GUI grouping): {arranged_score}")
+            print(f"   Locked Score: {player.locked_score}")
 
-        print(f"[{i}] {player.name}{marker}")
+        # Draw pile
+        if self.draw_pile:
+            print(f"Draw Pile Count: {self.draw_pile.count()}")
 
-        print(f"   Hand Size: {len(player.hand)}")
-        print(f"   Drawn This Turn: {player.drawn}")
-
-        # Scores
-        arranged_score = player.player_get_hand_score()
-        logic_score = player.get_hand_score()
-
-        print(f"   Arranged Score (GUI grouping): {arranged_score}")
-        print(f"   Logic Score (AI): {logic_score}")
-        print(f"   Locked Score: {player.locked_score}")
-
-        # Tiles
-        print("   Tiles:",
-              [(t.value, t.color) for t in player.hand])
-
-        # Groups
-        if hasattr(player, "groups"):
-            print("   Groups:")
-            for group in player.groups:
-                print("    ", [(t.value, t.color) for t in group])
-
-        print("")
-
-    # Draw pile
-    if self.draw_pile:
-        print(f"Draw Pile Count: {self.draw_pile.count()}")
-
-    print("================================\n")
+        print("================================\n")
