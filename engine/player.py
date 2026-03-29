@@ -304,8 +304,8 @@ class Player:
                     continue
 
                 # extract tile values and colors
-                numbers = [t.value for t in subgroup if t.value is not None]
-                colors = [t.color for t in subgroup if t.color is not None]
+                numbers = [t.tile_info.value for t in subgroup if t.tile_info.value is not None]
+                colors = [t.tile_info.color for t in subgroup if t.tile_info.color is not None]
 
 
                 # -------------------------

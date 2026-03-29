@@ -122,9 +122,6 @@ class GameView(arcade.View):
         # Com hand display tracker
         self.com_displaying_hand = None
 
-        # player name pop-up
-        # self.game.enter_player_name()
-
     def on_show_view(self):
         self.background_color = colr.THEME_LIGHT_BLUE
 
@@ -200,7 +197,7 @@ class GameView(arcade.View):
         for i, tile in enumerate(self.game.players[0].hand):
             tile.set_curr_slot(self.stand_slot_list[i])
             self.stand_slot_list[i].holding_tile = True
-            tile.set_face_up()
+            tile.tile_info.set_face_up()
             self.tile_list.append(tile)
 
     # Com setup
@@ -303,7 +300,7 @@ class GameView(arcade.View):
                         top_tile.center_y = slot.center_y
                         slot.holding_tile = True
                         top_tile.current_slot = slot
-                        top_tile.set_face_up()
+                        top_tile.tile_info.set_face_up()
                         self.tile_list.append(top_tile)
                         break
                 return
@@ -313,7 +310,7 @@ class GameView(arcade.View):
                 if discard.collides_with_point((x, y)):
                     if not discard.player_com_discard:
                         continue
-                    top_tile = self.game.draw_from_discard(discard)
+                    top_tile = self.game.turn.draw_from_discard(discard)
                     if top_tile is None:
                         return
                     print(f"Drawn from discard pile: {top_tile.value}")
@@ -385,7 +382,7 @@ class GameView(arcade.View):
         # Check if end_turn button was clicked
         if self.end_turn_button.button_pressed(x, y):
 
-            player = self.game.get_current_player()
+            player = self.game.turn.get_current_player()
             disc = player.discard_pile
 
             # must have placed a tile in discard
@@ -414,7 +411,7 @@ class GameView(arcade.View):
             return
 
         tile = self.held_tiles[0]
-        player = self.game.get_current_player()
+        player = self.game.turn.get_current_player()
         disc = player.discard_pile
 
         # remove tile from discard list if was in disc
@@ -449,7 +446,7 @@ class GameView(arcade.View):
 
         self.held_tiles = []
         tile.unhighlight()
-        self.score = self.game.get_current_player().player_get_hand_score()
+        self.score = self.game.turn.get_current_player().player_get_hand_score()
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:
