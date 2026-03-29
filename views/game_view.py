@@ -308,25 +308,29 @@ class GameView(arcade.View):
         self.setup()
 
     def on_mouse_press(self, x, y, button, modifiers):
+        # prevents more clicking of player after end of turn
+        if self.game.get_current_player() != self.game.players[0]:
+            return
 
         # TILE IS CLICKED
         clicked_tiles = arcade.get_sprites_at_point((x, y), self.tile_list)
         if len(clicked_tiles) > 0:
-            self.held_tiles.append(clicked_tiles[0])
-            self.pull_to_top(self.held_tiles[0])
-            # Highlight tile
-            self.held_tiles[0].highlight()
-            # Return if clicked
+            tile = clicked_tiles[0]
+
+            # prevent a player from picking up discarded tile after ending their turn
+            for disc in self.game.discards:
+                if tile in disc.tiles and self.game.turn_ended:
+                    print("Cannot move discarded tile after ending turn")
+                    return
+
+            # Otherwise allow normal dragging
+            self.held_tiles.append(tile)
+            self.pull_to_top(tile)
+            tile.highlight()
             return
 
+        # ---- Draw + discard
         if self.open_displaying_player is None:
-            # Check if a card had been clicked
-            if len(clicked_tiles) > 0:
-                self.held_tiles.append(clicked_tiles[0])
-                self.pull_to_top(self.held_tiles[0])
-
-                # Return if clicked
-                return
 
             # Check if draw pile was clicked
             if self.draw_pile.collides_with_point((x, y)):
@@ -335,7 +339,7 @@ class GameView(arcade.View):
                 # if draw not allowed, stop
                 if top_tile is None:
                     return
-                print("Tile drawn from draw pile")
+                print(f"Tile drawn from draw pile: {top_tile.value}")
 
                 # Add tile to gui hand
                 for slot in self.stand_slot_list:
@@ -357,7 +361,7 @@ class GameView(arcade.View):
                     top_tile = self.game.draw_from_discard(discard)
                     if top_tile is None:
                         return
-                    print("drawn from discard pile")
+                    print(f"Drawn from discard pile: {top_tile.value}")
 
                     # Add tile to gui hand
                     for slot in self.stand_slot_list:
@@ -425,8 +429,23 @@ class GameView(arcade.View):
 
         # Check if end_turn button was clicked
         if self.end_turn_button.button_pressed(x, y):
-            self.game.end_turn()
 
+            player = self.game.get_current_player()
+            disc = player.discard_pile
+
+            # must have placed a tile in discard
+            if not disc.tiles:
+                print("Please place a tile in discard before ending your turn")
+                return
+
+            # get the tile that is visually in discard
+            tile = disc.tiles[-1]
+
+            # Handing discard to game logic
+            self.game.discard_tile(tile)
+            # now end turn
+            self.game.end_turn()
+            return
 
         # check if menu was clicked
         if self.menu_button.button_pressed(x, y):
@@ -440,9 +459,12 @@ class GameView(arcade.View):
             return
 
         tile = self.held_tiles[0]
+        player = self.game.get_current_player()
+        disc = player.discard_pile
 
-        # Get discard pile
-        disc = self.game.discards[0]
+        # remove tile from discard list if was in disc
+        if tile in disc.tiles and not arcade.check_for_collision(tile, disc):
+            disc.tiles.remove(tile)
 
         # get set of slots
         available_slots = list(self.stand_slot_list)
@@ -462,17 +484,17 @@ class GameView(arcade.View):
             if touching_slot in self.open_stand_slot_list:
                 self.current_open_tiles.append(tile)
                 self.open_window_tiles.append(tile)
+            if tile not in player.hand:
+                player.hand.append(tile)
         elif arcade.check_for_collision(tile, disc):
-            # TODO: prevent someone from picking this back up
-            # tile.position = (disc.center_x, disc.center_y)
             self.snap(tile, [disc])
+            disc.tiles.append(tile)
         else:
-            # return tile to original position
             self.snap(tile, available_slots)
 
         self.held_tiles = []
         tile.unhighlight()
-        self.score = self.game.players[0].player_get_hand_score()
+        self.score = self.game.get_current_player().player_get_hand_score()
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:

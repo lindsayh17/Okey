@@ -35,12 +35,11 @@ class Game:
         self.current_player_idx = 0 # to track turn of player
         self.last_discard = None # track most recently discarded tile
         self.must_draw = False # check if player must draw before discarding
+        self.turn_ended = False # to track if discard is finalized
 
     def start_new_round(self, starting_player_idx=0):
         """
         Starts a new round
-        :param starting_player_idx:
-        :return:
         """
         # Dealer deals cards to the player and computers after
         # building tiles and randomizing. Returns remaining draw pile.
@@ -54,7 +53,7 @@ class Game:
 
         # first player starts with 15, no draw here
         self.must_draw = False
-
+        self.turn_ended = False
         # print(f"\n *** NEW ROUND ***")
         # print(f"Starting player: {self.players[self.current_player_idx].name}")
 
@@ -153,6 +152,9 @@ class Game:
 
         # after drawing, must discard
         self.must_draw = False
+
+        self.turn_ended = False
+
         print(f"{player.name} drew {tile.value} from middle pile")
 
         return tile
@@ -183,6 +185,7 @@ class Game:
         # update state
         player.drawn = True
         self.must_draw = False
+        self.turn_ended = False
 
         print(f"{player.name} drew {tile.value} from discard pile")
 
@@ -193,6 +196,8 @@ class Game:
         Finalizes the turn of a player by validating rules.
         Locks player's arranged valid tile groupings
         """
+        self.turn_ended = True
+
         player = self.get_current_player()
 
         # validate that player indeed discarded
@@ -232,59 +237,39 @@ class Game:
         # Runs the com discard function
         self.discard_tile(player.com_discard_tile())
         self.end_turn()
+    def debug_state(self):
+        """
+        Prints game state in readable format
+        """
 
-def debug_state(self):
-    """
-    Prints full game state in a clean, readable format
-    """
+        print("\n========== GAME STATE ==========")
 
-    print("\n========== GAME STATE ==========")
+        current_idx = self.current_player_idx
+        current_player = self.get_current_player()
 
-    # Last action
-    print(f"Last Action: {self.last_action}")
+        # Focus more on human player (index 0)
+        player = self.players[0]
 
-    # Turn info
-    print(f"Current Player Index: {self.current_player_idx}")
-    print(f"Current Player: {self.get_current_player().name}")
-    print(f"Must Draw: {self.must_draw}")
-
-    if self.last_discard:
-        print(f"Last Discard Tile: {self.last_discard.value} ({self.last_discard.color})")
-    else:
-        print("Last Discard Tile: None")
-
-    print("\n--- PLAYERS ---")
-
-    for i, player in enumerate(self.players):
-        marker = " <-- CURRENT" if i == self.current_player_idx else ""
-
-        print(f"[{i}] {player.name}{marker}")
-
-        print(f"   Hand Size: {len(player.hand)}")
-        print(f"   Drawn This Turn: {player.drawn}")
+        print(f"\n--- Player [0] {player.name} ---")
+        print(f"Hand Size: {len(player.hand)}")
+        print(f"Drawn This Turn: {player.drawn}")
 
         # Scores
         arranged_score = player.player_get_hand_score()
-        logic_score = player.get_hand_score()
+        print(f"GUI tile arrangement Score: {arranged_score}")
+        print(f"Locked Score: {player.locked_score}")
 
-        print(f"   Arranged Score (GUI grouping): {arranged_score}")
-        print(f"   Logic Score (AI): {logic_score}")
-        print(f"   Locked Score: {player.locked_score}")
+        # Discard
+        if player.discard_pile.tiles:
+            top_tile = player.discard_pile.tiles[-1]
+            print(f"Top Discard: {top_tile.value}")
+        else:
+            print("Top Discard: None")
 
-        # Tiles
-        print("   Tiles:",
-              [(t.value, t.color) for t in player.hand])
+        print(f"Turn Ended: {self.turn_ended}")
 
-        # Groups
-        if hasattr(player, "groups"):
-            print("   Groups:")
-            for group in player.groups:
-                print("    ", [(t.value, t.color) for t in group])
+        # Draw pile
+        if self.draw_pile:
+            print(f"Draw Pile Count: {self.draw_pile.count()}")
 
-        print("")
-
-    # Draw pile
-    if self.draw_pile:
-        print(f"Draw Pile Count: {self.draw_pile.count()}")
-
-    print("================================\n")
+        print("================================\n")
