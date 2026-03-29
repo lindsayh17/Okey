@@ -120,7 +120,6 @@ class Player:
 
         # Remove it from hand and add to discard
         self.hand.remove(lowest_tile)
-        self.discard_pile.append(lowest_tile)
 
         return lowest_tile
 
@@ -213,7 +212,7 @@ class Player:
             for i in range(1, len(tiles)):
 
                 # If current tile is exactly 1 greater than previous → consecutive
-                if tiles[i].value == tiles[i - 1].value + 1:
+                if int(tiles[i].value) == tiles[i - 1].value + 1:
                     current_run.append(tiles[i])
 
                 else:
@@ -233,6 +232,9 @@ class Player:
                 self.hand_score += sum(t.value for t in current_run)
                 for t in current_run:
                     self.used_tiles.add(t)
+        
+        # Add any joker tiles to used tiles
+        self.used_tiles.update(t for t in score_hand if t.is_joker)
 
         # Return score
         return self.hand_score
