@@ -34,10 +34,8 @@ class GuiDrawPile(arcade.Sprite):
         # Back of top tile
 
         back_tile = rr.RoundedRectangle(
-            self.center_x,
-            self.center_y,
-            TILE_WIDTH,
-            TILE_HEIGHT,
+            [self.center_x, self.center_y],
+            [TILE_WIDTH, TILE_HEIGHT],
             TILE_HEIGHT // 9,
             (222, 212, 193)
         )

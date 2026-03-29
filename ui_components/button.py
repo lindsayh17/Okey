@@ -1,7 +1,10 @@
 import arcade
-import ui_components.rounded_rectangle as rounded_rectangle
+from ui_components import rounded_rectangle
 
 class Button():
+    """
+    Creates a button using a rounded rectangle and text.
+    """
     def __init__(self, x, y, width, height, value, color, text_color):
         self.center_x = x
         self.center_y = y
@@ -19,10 +22,8 @@ class Button():
 
     def draw(self):
         # draw a rounded rectangle
-        self.rect = rounded_rectangle.RoundedRectangle(self.center_x,
-                                                  self.center_y,
-                                                  self.width,
-                                                  self.height,
+        self.rect = rounded_rectangle.RoundedRectangle([self.center_x, self.center_y],
+                                                  [self.width, self.height],
                                                   self.radius,
                                                   self.color)
 
