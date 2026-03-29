@@ -26,7 +26,7 @@ class Game:
                         Player(self.discards[2],"Com_2", True),
                         Player(self.discards[3],"Com_3", True)]
 
-        self.dealer = Dealer()
+        self.dealer = Dealer(self.window_width, self.window_height)
         self.draw_pile = None
         self.turn = Turn(self.players, self.draw_pile)
 

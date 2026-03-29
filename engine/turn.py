@@ -80,7 +80,7 @@ class Turn:
             return None
 
         # draw from pile
-        tile = self.draw_pile.draw()
+        tile = self.draw_pile.draw_tile()
         player.hand.append(tile)
 
         # mark that player has drawn

@@ -17,7 +17,7 @@ class Button():
         self.rect = None
 
     def draw(self):
-        # draw a rounded rectangle
+        # draw_tile a rounded rectangle
         self.rect = rounded_rectangle.RoundedRectangle([self.coordinates["x"],
                                                         self.coordinates["y"]],
                                                   [self.dimensions["width"],
@@ -25,7 +25,7 @@ class Button():
                                                   self.radius,
                                                   self.colors["color"])
 
-        # draw button text
+        # draw_tile button text
         arcade.load_font("assets/fonts/Itim-Regular.ttf")
         txt = arcade.Text(
             self.text,

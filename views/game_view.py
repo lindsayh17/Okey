@@ -1,6 +1,5 @@
 import arcade
 from com import Com, COM_WIDTH
-from gui_draw_pile import GuiDrawPile
 from stand_slot import StandSlot, DIVIDER_GAP
 from engine.game import Game
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
@@ -34,8 +33,6 @@ class GameView(arcade.View):
         self.player_stand = Stand()
 
         self.held_tiles = []
-        self.draw_pile = None
-        self.draw_pile_label = None
 
         self.player_discard = None
 
@@ -72,8 +69,6 @@ class GameView(arcade.View):
         self.stand_slot_list = self.player_stand.setup(self.width)
         # Com coordinates
         self.setup_coms()
-        # Draw pile coordinates
-        self.setup_draw_pile()
 
         self.setup_player_tiles()
 
@@ -95,7 +90,7 @@ class GameView(arcade.View):
             disc.draw()
 
         # Draw draw pile
-        self.draw_pile.draw()
+        self.game.draw_pile.draw()
 
         if self.open_displaying_player is not None:
             # Draw window box
@@ -181,14 +176,6 @@ class GameView(arcade.View):
         Com.assign_unique_icons(self.com_list)
         Com.assign_unique_names(self.com_list)
 
-    # Draw pile setup
-    def setup_draw_pile(self):
-        self.draw_pile = GuiDrawPile(
-            self.width / 2,
-            self.height / 2,
-            self.game.draw_pile,
-        )
-
     # Discard setup
     def setup_discard(self, player):
         pass
@@ -225,7 +212,7 @@ class GameView(arcade.View):
         if self.open_displaying_player is None:
 
             # Check if draw pile was clicked
-            if self.draw_pile.collides_with_point((x, y)):
+            if self.game.draw_pile.collides_with_point((x, y)):
                 # make Game handle draw logic
                 top_tile = self.game.turn.draw_tile()
                 # if draw not allowed, stop

@@ -36,7 +36,7 @@ For example, a set of three 3s is worth 9 points (3 × 3).
 During a turn:
 
 - A player draws one tile:
-  - From the **face-down draw pile**, or
+  - From the **face-down draw_tile pile**, or
   - From the **previously discarded (visible) tile** of the player before them, provided they are opening their hand using that tile (see Opening Requirements below).
 - The player may arrange or play tiles according to the game rules.
 - The player must discard one tile to end their turn.

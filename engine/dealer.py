@@ -13,7 +13,9 @@ class Dealer:
     """
     TODO: make docstring
     """
-    def __init__(self):
+    def __init__(self, width, height):
+        self.window_width = width
+        self.window_height = height
         self.rng = random.Random()
 
     def build_okey_set(self):
@@ -53,7 +55,8 @@ class Dealer:
         players[starting_player_idx].draw_tile(tiles.pop())
 
         # remaining tiles go on draw pile
-        draw_pile = DrawPile(tiles)
+        draw_pile = DrawPile(self.window_width / 2,
+            self.window_height / 2, tiles)
 
         # return this draw pile back
         return draw_pile
