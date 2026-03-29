@@ -73,6 +73,7 @@ class Player:
         self.groups = [] # groups of tiles put together by player, empty initially
         self.played = [] # tiles that are displayed when the player opens
         self.sets_played = [] # sets of tiles out of what the player has opened with
+        self.used_tiles = set() # Keep track of tiles that have already been used in a set or run
         self.discard_pile = disc # player's discard piles, empty initially
         self.locked_score = 0
         self.can_open = False
@@ -100,6 +101,28 @@ class Player:
         self.discard_pile.append(tile)
         return tile # visible face-up tile discarded
 
+    def com_discard_tile(self):
+        """Handles AI player's discard logic."""
+        # Filter tiles that:
+        # - are not None
+        # - were not used in scoring
+        candidates = [
+            tile for tile in self.hand
+            if tile is not None and tile not in self.used_tiles
+        ]
+
+        # If no valid tiles to discard, do nothing
+        if not candidates:
+            return None
+
+        # Find the tile with the lowest value
+        lowest_tile = min(candidates, key=lambda t: t.value)
+
+        # Remove it from hand and add to discard
+        self.hand.remove(lowest_tile)
+
+        return lowest_tile
+
     def hand_size(self):
         """
         returns number of tiles in the hand
@@ -116,16 +139,13 @@ class Player:
 
     # TO-DO: address disabled 'R0912: Too many branches'
     # pylint: disable=R0912
-    # Calculates the possible points earned for the player based on their current hand
     def get_hand_score(self):
+        """Calculates the possible points earned for the player based on their current hand"""
         # Resets turn_score each time points are calculated
         self.hand_score = 0
+
         # Create a copy of the player's hand so we don't modify the original list
         score_hand = list(self.hand)
-
-        # Keep track of tiles that have already been used in a set or run
-        # This prevents double-counting and enforces set priority
-        used_tiles = set()
 
         # ===================================
         # Check For Sets (Priority Over Runs)
@@ -143,7 +163,7 @@ class Player:
         for _, tiles in number_groups.items():
 
             # Only consider tiles that have not already been used
-            available_tiles = [t for t in tiles if t not in used_tiles]
+            available_tiles = [t for t in tiles if t not in self.used_tiles]
 
             # Ensure colors are unique (sets require different colors)
             # Dictionary prevents duplicate colors
@@ -158,7 +178,7 @@ class Player:
 
                 # Mark these tiles as used so runs cannot reuse them
                 for tile in valid_set:
-                    used_tiles.add(tile)
+                    self.used_tiles.add(tile)
 
                 # Add sum of tile numbers to score
                 self.hand_score += sum(tile.value for tile in valid_set)
@@ -172,7 +192,7 @@ class Player:
         color_groups = defaultdict(list)
 
         for tile in score_hand:
-            if tile not in used_tiles:
+            if tile not in self.used_tiles:
                 color_groups[tile.color].append(tile)
 
         # Check each color group for consecutive sequences
@@ -192,7 +212,7 @@ class Player:
             for i in range(1, len(tiles)):
 
                 # If current tile is exactly 1 greater than previous → consecutive
-                if tiles[i].value == tiles[i - 1].value + 1:
+                if int(tiles[i].value) == tiles[i - 1].value + 1:
                     current_run.append(tiles[i])
 
                 else:
@@ -202,7 +222,7 @@ class Player:
 
                         # Mark run tiles as used
                         for t in current_run:
-                            used_tiles.add(t)
+                            self.used_tiles.add(t)
 
                     # Start a new potential run
                     current_run = [tiles[i]]
@@ -211,7 +231,10 @@ class Player:
             if len(current_run) >= 3:
                 self.hand_score += sum(t.value for t in current_run)
                 for t in current_run:
-                    used_tiles.add(t)
+                    self.used_tiles.add(t)
+        
+        # Add any joker tiles to used tiles
+        self.used_tiles.update(t for t in score_hand if t.is_joker)
 
         # Return score
         return self.hand_score
@@ -318,8 +341,7 @@ class Player:
         # Return total score from all valid groups sums
         return self.hand_score
 
-    # Calculates the turn score after the turn has ended
     def get_turn_score(self):
+        """Calculates the turn score after the turn has ended"""
         self.hand_score += sum(tile.value for tile in self.hand)
         return self.turn_score
-
