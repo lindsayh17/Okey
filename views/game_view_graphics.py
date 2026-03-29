@@ -3,9 +3,10 @@ import assets.colors as colr
 import ui_components.button as ui_button
 
 class GameViewGraphics:
+    """
+    Basic graphics (score label, buttons) for game view
+    """
     def __init__(self, window, stand_height):
-        self.background_color = colr.THEME_LIGHT_BLUE
-
         # hand score
         self.score_label = arcade.Text(
             "Hand Score",

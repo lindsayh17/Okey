@@ -24,7 +24,7 @@ class MenuView(arcade.View):
         title_x = self.window.width / 2
         title_y = 6 * self.window.height / 10
 
-        button_width = self.window.width / 6
+        menu_buttons_width = self.window.width / 6
         button_height = self.window.height / 12
         close_button = self.window.height / 16
 
@@ -53,7 +53,7 @@ class MenuView(arcade.View):
         # rules button
         self.rules_button = button.Button([title_x,
                                           title_y - button_height * 1.2],
-                                          [button_width,
+                                          [menu_buttons_width,
                                           button_height],
                                           "Rules",
                                           [colr.THEME_TEAL,
@@ -61,7 +61,7 @@ class MenuView(arcade.View):
 
         self.quit_button = button.Button([title_x,
                                           title_y - button_height * 3],
-                                          [button_width,
+                                          [menu_buttons_width,
                                           button_height],
                                           "Quit",
                                           [colr.THEME_YELLOW,

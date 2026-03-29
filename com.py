@@ -20,8 +20,6 @@ class Com(arcade.Sprite):
         self.value_color = tuple(color)
         self.name = "Com"
         self.player = player
-        # removed box_size = 150
-        self.com_displaying_hand = False
         self.label = arcade.Text(
             self.name,
             self.center_x,

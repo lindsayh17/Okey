@@ -1,5 +1,3 @@
-"""Application window: central place for cross-view navigation (avoids circular imports)."""
-
 import arcade
 
 from assets.utils import Views
@@ -11,7 +9,10 @@ from views.title_view import TitleView
 
 
 class ViewManager(arcade.Window):
-    """Arcade window that knows how to switch between all views."""
+    """
+    Arcade window that knows how to switch between all views.
+    Avoids circular imports.
+    """
 
     def show_title(self):
         self.show_view(TitleView())

@@ -3,6 +3,9 @@ from engine.tile import TILE_WIDTH, TILE_HEIGHT
 from stand_slot import StandSlot, DIVIDER_GAP
 
 class Stand:
+    """
+    Stand that has stand_slots drawn on top
+    """
     def __init__(self):
         self.stand_start_x = 0
         self.open_stand_start_x = 0

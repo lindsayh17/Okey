@@ -47,8 +47,8 @@ class RulesView(arcade.View):
         """ This is run once when we switch to this view """
         self.window.background_color = colr.THEME_DARK_BLUE
 
-        title_x = self.window.width / 2
-        title_y = 17 * self.window.height / 20
+        rules_x = self.window.width / 2
+        rules_y = 17 * self.window.height / 20
 
         button_width = self.window.width / 5
         button_height = self.window.height / 10
@@ -58,8 +58,8 @@ class RulesView(arcade.View):
         # Title text
         self.title_text = arcade.Text(
             "Rules",
-            title_x,
-            title_y,
+            rules_x,
+            rules_y,
             colr.THEME_PINK,
             font_size=self.window.height * 0.1,
             anchor_x="center",
@@ -68,7 +68,7 @@ class RulesView(arcade.View):
 
         self.objective_text = arcade.Text(
             "Objective: Form runs and sets to minimize points.",
-            title_x,
+            rules_x,
             self.window.height * 0.8,
             colr.THEME_YELLOW,
             font_size=self.window.height * 0.03,
@@ -116,7 +116,7 @@ class RulesView(arcade.View):
 
         # Exit button
         self.exit_button = button.Button(
-            [title_x,
+            [rules_x,
             self.window.height / 10],
             [button_width,
             button_height],
