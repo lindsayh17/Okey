@@ -1,3 +1,5 @@
+import time
+
 class Turn:
     def __init__(self, players):
         self.players = players
@@ -148,4 +150,22 @@ class Turn:
         self.must_draw = True
 
         print(f"Next player's turn: {self.get_current_player().name}")
-        self.debug_state()
+        # self.debug_state()
+        # If the current player is AI, run the com turn logic
+        if self.get_current_player().is_player_ai:
+            self.com_turn()
+
+    def com_turn(self):
+        """Handles AI player's full turn."""
+        player = self.get_current_player()
+        self.draw_tile()
+        # Simulated wait time
+        time.sleep(2)
+        # Gets the hand score and determines which tiles are being used for scoring
+        player.get_hand_score()
+        # TODO: Add opening logic here
+        # Simulated wait time
+        time.sleep(2)
+        # Runs the com discard function
+        self.discard_tile(player.com_discard_tile())
+        self.end_turn()
