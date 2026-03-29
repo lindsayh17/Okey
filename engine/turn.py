@@ -56,7 +56,7 @@ class Turn:
         player.discard_pile.tiles.clear() # remove everything in discard pile
         player.discard_pile.tiles.append(tile) # add tile player just discarded
 
-        print(f"{player.name} placed {tile.value} in discard (NOT FINAL)")
+        print(f"{player.name} placed {tile.tile_info.value} in discard (NOT FINAL)")
 
     def draw_tile(self):
         """
@@ -91,7 +91,7 @@ class Turn:
 
         self.turn_ended = False
 
-        print(f"{player.name} drew {tile.value} from middle pile")
+        print(f"{player.name} drew {tile.tile_info.value} from middle pile")
 
         return tile
 
@@ -123,7 +123,7 @@ class Turn:
         self.must_draw = False
         self.turn_ended = False
 
-        print(f"{player.name} drew {tile.value} from discard pile")
+        print(f"{player.name} drew {tile.tile_info.value} from discard pile")
 
         return tile
 

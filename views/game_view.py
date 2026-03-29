@@ -218,7 +218,7 @@ class GameView(arcade.View):
                 # if draw not allowed, stop
                 if top_tile is None:
                     return
-                print(f"Tile drawn from draw pile: {top_tile.value}")
+                print(f"Tile drawn from draw pile: {top_tile.tile_info.value}")
 
                 # Add tile to gui hand
                 for slot in self.stand_slot_list:
@@ -339,9 +339,13 @@ class GameView(arcade.View):
         player = self.game.turn.get_current_player()
         disc = player.discard_pile
 
+        print(arcade.check_for_collision(tile, disc))
+        print(disc.holding_tile)
+
         # remove tile from discard list if was in disc
         if tile in disc.tiles and not arcade.check_for_collision(tile, disc):
             disc.tiles.remove(tile)
+            disc.holding_tile = False
 
         # get set of slots
         available_slots = list(self.stand_slot_list)
@@ -366,6 +370,7 @@ class GameView(arcade.View):
         elif arcade.check_for_collision(tile, disc):
             self.snap(tile, [disc])
             disc.tiles.append(tile)
+            disc.holding_tile = True
         else:
             self.snap(tile, available_slots)
 

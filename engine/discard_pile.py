@@ -9,7 +9,7 @@ class DiscardPile(arcade.Sprite):
     BORDER_WIDTH = 4
 
     def __init__(self, x, y, tiles=None):
-        super().__init__(hit_box_algorithm="None")
+        super().__init__()
 
         # list of tiles that are in this discard pile
         if tiles is None:

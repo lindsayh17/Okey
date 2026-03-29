@@ -116,7 +116,7 @@ class Player:
             return None
 
         # Find the tile with the lowest value
-        lowest_tile = min(candidates, key=lambda t: t.value)
+        lowest_tile = min(candidates, key=lambda t: t.tile_info.value)
 
         # Remove it from hand and add to discard
         self.hand.remove(lowest_tile)
@@ -160,7 +160,7 @@ class Player:
         number_groups = defaultdict(list)
 
         for tile in score_hand:
-            number_groups[tile.value].append(tile)
+            number_groups[tile.tile_info.value].append(tile)
 
         # Evaluate each number group to see if it forms a valid set
         for _, tiles in number_groups.items():
@@ -172,8 +172,8 @@ class Player:
             # Dictionary prevents duplicate colors
             unique_colors = {}
             for tile in available_tiles:
-                if tile.color not in unique_colors:
-                    unique_colors[tile.color] = tile
+                if tile.tile_info.color not in unique_colors:
+                    unique_colors[tile.tile_info.color] = tile
 
             # Valid set must have 3 or 4 different colors
             if 3 <= len(unique_colors) <= 4:
@@ -184,7 +184,7 @@ class Player:
                     self.used_tiles.add(tile)
 
                 # Add sum of tile numbers to score
-                self.hand_score += sum(tile.value for tile in valid_set)
+                self.hand_score += sum(tile.tile_info.value for tile in valid_set)
 
         # ===================================
         # Check For Runs (Using Remaining Tiles Only)
@@ -196,7 +196,7 @@ class Player:
 
         for tile in score_hand:
             if tile not in self.used_tiles:
-                color_groups[tile.color].append(tile)
+                color_groups[tile.tile_info.color].append(tile)
 
         # Check each color group for consecutive sequences
         for _, tiles in color_groups.items():
@@ -204,8 +204,8 @@ class Player:
             # Sort tiles by number to detect consecutive values
             # Ignores Jokers for the time being
             tiles = sorted(
-                [t for t in tiles if t.value is not None],
-                key=lambda t: t.value
+                [t for t in tiles if t.tile_info.value is not None],
+                key=lambda t: t.tile_info.value
             )
 
             # Start building a potential run
@@ -215,13 +215,13 @@ class Player:
             for i in range(1, len(tiles)):
 
                 # If current tile is exactly 1 greater than previous → consecutive
-                if int(tiles[i].value) == tiles[i - 1].value + 1:
+                if int(tiles[i].tile_info.value) == tiles[i - 1].tile_info.value + 1:
                     current_run.append(tiles[i])
 
                 else:
                     # Sequence broke — check if the previous run is valid
                     if len(current_run) >= 3:
-                        self.hand_score += sum(t.value for t in current_run)
+                        self.hand_score += sum(t.tile_info.value for t in current_run)
 
                         # Mark run tiles as used
                         for t in current_run:
@@ -232,7 +232,7 @@ class Player:
 
             # After loop ends, check the final run
             if len(current_run) >= 3:
-                self.hand_score += sum(t.value for t in current_run)
+                self.hand_score += sum(t.tile_info.value for t in current_run)
                 for t in current_run:
                     self.used_tiles.add(t)
 
@@ -347,5 +347,5 @@ class Player:
     # Calculates the turn score after the turn has ended
     def get_turn_score(self):
         """Calculates the turn score after the turn has ended"""
-        self.hand_score += sum(tile.value for tile in self.hand)
+        self.hand_score += sum(tile.tile_info.value for tile in self.hand)
         return self.turn_score
