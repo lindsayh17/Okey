@@ -1,7 +1,6 @@
 """
 Controls the main gameplay logic
 """
-import time
 from engine.dealer import Dealer
 from engine.player import Player
 from engine.discard_pile import DiscardPile
@@ -29,7 +28,7 @@ class Game:
 
         self.dealer = Dealer()
         self.draw_pile = None
-        self.turn = Turn(self.players)
+        self.turn = Turn(self.players, self.draw_pile)
 
     def start_new_round(self, starting_player_idx=0):
         """
@@ -38,6 +37,7 @@ class Game:
         # Dealer deals cards to the player and computers after
         # building tiles and randomizing. Returns remaining draw pile.
         self.draw_pile = self.dealer.deal_new_round(self.players, starting_player_idx)
+        self.turn.draw_pile = self.draw_pile
 
         self.turn.new_round(starting_player_idx)
 
@@ -78,9 +78,6 @@ class Game:
         """
 
         print("\n========== GAME STATE ==========")
-
-        current_idx = self.turn.current_player_idx
-        current_player = self.turn.get_current_player()
 
         # Focus more on human player (index 0)
         player = self.players[0]

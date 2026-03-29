@@ -149,7 +149,6 @@ class Player:
 
         # Keep track of tiles that have already been used in a set or run
         # This prevents double-counting and enforces set priority
-        used_tiles = set()
 
         # ===================================
         # Check For Sets (Priority Over Runs)
@@ -350,4 +349,3 @@ class Player:
         """Calculates the turn score after the turn has ended"""
         self.hand_score += sum(tile.value for tile in self.hand)
         return self.turn_score
-

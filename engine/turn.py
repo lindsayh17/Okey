@@ -1,8 +1,12 @@
 import time
 
 class Turn:
-    def __init__(self, players):
+    """
+    Manages a single turn in the game
+    """
+    def __init__(self, players, draw_pile):
         self.players = players
+        self.draw_pile = draw_pile
 
         # -------- Turn system --------
         self.current_player_idx = 0  # to track turn of player
@@ -54,7 +58,7 @@ class Turn:
 
         print(f"{player.name} placed {tile.value} in discard (NOT FINAL)")
 
-    def draw_tile(self, draw_pile):
+    def draw_tile(self):
         """
         function that handles the action of drawing a tile from middle pile
         """
@@ -71,12 +75,12 @@ class Turn:
             print("Tile already drawn for your turn")
             return None
 
-        if draw_pile.count() == 0:
+        if self.draw_pile.count() == 0:
             print("Draw pile is empty")
             return None
 
         # draw from pile
-        tile = draw_pile.draw()
+        tile = self.draw_pile.draw()
         player.hand.append(tile)
 
         # mark that player has drawn
