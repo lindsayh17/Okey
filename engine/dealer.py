@@ -26,12 +26,12 @@ class Dealer:
         for color, symbol in TILE_COLORS_SYMBOLS.items():
             for number in range(1, 14):
                 # appending two copies of each tile
-                tiles.append(Tile(0, 0, TileInfo(number, color, symbol, 0)))
-                tiles.append(Tile(0, 0, TileInfo(number, color, symbol, 1)))
+                tiles.append(Tile(TileInfo(number, color, symbol, 0)))
+                tiles.append(Tile(TileInfo(number, color, symbol, 1)))
 
         # Adding the jokers
-        tiles.append(Tile(0, 0, TileInfo(0, arcade.color.FOREST_GREEN, "⚡", 0)))
-        tiles.append(Tile(0, 0, TileInfo(0, arcade.color.FOREST_GREEN, "⚡", 1)))
+        tiles.append(Tile(TileInfo(0, arcade.color.FOREST_GREEN, "⚡", 0)))
+        tiles.append(Tile(TileInfo(0, arcade.color.FOREST_GREEN, "⚡", 0)))
 
         return tiles
 
