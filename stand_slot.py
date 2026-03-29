@@ -13,7 +13,7 @@ class StandSlot(arcade.Sprite):
         self.center_x = x
         self.center_y = y
         self.color = color
-        self.scale = 5
+        self.scale = 1
         self.border_width = 4
 
         # For when adding tiles to stand
