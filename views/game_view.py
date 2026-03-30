@@ -90,7 +90,7 @@ class GameView(arcade.View):
             disc.draw()
 
         # Draw draw pile
-        self.game.draw_pile.draw()
+        self.game.turn.draw_pile.draw()
 
         if self.open_displaying_player is not None:
             # Draw window box
@@ -212,7 +212,7 @@ class GameView(arcade.View):
         if self.open_displaying_player is None:
 
             # Check if draw pile was clicked
-            if self.game.draw_pile.collides_with_point((x, y)):
+            if self.game.turn.draw_pile.collides_with_point((x, y)):
                 # make Game handle draw logic
                 top_tile = self.game.turn.draw_tile()
                 # if draw not allowed, stop

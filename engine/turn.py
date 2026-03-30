@@ -4,9 +4,9 @@ class Turn:
     """
     Manages a single turn in the game
     """
-    def __init__(self, players, draw_pile):
+    def __init__(self, players):
         self.players = players
-        self.draw_pile = draw_pile
+        self.draw_pile = None
 
         # -------- Turn system --------
         self.current_player_idx = 0  # to track turn of player

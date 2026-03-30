@@ -27,8 +27,7 @@ class Game:
                         Player(self.discards[3],"Com_3", True)]
 
         self.dealer = Dealer(self.window_width, self.window_height)
-        self.draw_pile = None
-        self.turn = Turn(self.players, self.draw_pile)
+        self.turn = Turn(self.players)
 
     def start_new_round(self, starting_player_idx=0):
         """
@@ -36,8 +35,7 @@ class Game:
         """
         # Dealer deals cards to the player and computers after
         # building tiles and randomizing. Returns remaining draw pile.
-        self.draw_pile = self.dealer.deal_new_round(self.players, starting_player_idx)
-        self.turn.draw_pile = self.draw_pile
+        self.turn.draw_pile = self.dealer.deal_new_round(self.players, starting_player_idx)
 
         self.turn.new_round(starting_player_idx)
 

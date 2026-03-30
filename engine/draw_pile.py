@@ -59,5 +59,5 @@ class DrawPile(arcade.Sprite):
                                  TILE_WIDTH/4,
                                  colr.THEME_DARK_BLUE,
                                  num_segments=-1)
-
+        self.tile_count_text.text = self.count()
         self.tile_count_text.draw()
