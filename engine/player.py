@@ -347,5 +347,5 @@ class Player:
     # Calculates the turn score after the turn has ended
     def get_turn_score(self):
         """Calculates the turn score after the turn has ended"""
-        self.hand_score += sum(tile.tile_info.value for tile in self.hand)
+        self.turn_score += sum(tile.tile_info.value for tile in self.hand)
         return self.turn_score
