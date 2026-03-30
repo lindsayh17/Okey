@@ -237,7 +237,7 @@ class Player:
                     self.used_tiles.add(t)
 
                     # Add any joker tiles to used tiles
-                    self.used_tiles.update(t for t in score_hand if t.is_joker)
+                    self.used_tiles.update(t for t in score_hand if t.tile_info.is_joker)
 
         # Return score
         return self.hand_score
