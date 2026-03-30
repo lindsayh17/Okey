@@ -30,6 +30,7 @@ class StandSlot(arcade.Sprite):
 
     def tile_overlaps(self, tile):
         return (
+            # make sure tile is less than a tile away from slot
             abs(tile.center_x - self.center_x) * 2 < TILE_WIDTH
             and abs(tile.center_y - self.center_y) * 2 < TILE_HEIGHT
         )

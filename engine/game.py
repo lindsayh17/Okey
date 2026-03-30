@@ -99,7 +99,7 @@ class Game:
         print(f"Turn Ended: {self.turn.turn_ended}")
 
         # Draw pile
-        if self.draw_pile:
-            print(f"Draw Pile Count: {self.draw_pile.count()}")
+        if self.turn.draw_pile:
+            print(f"Draw Pile Count: {self.turn.draw_pile.count()}")
 
         print("================================\n")
