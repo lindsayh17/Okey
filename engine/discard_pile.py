@@ -41,3 +41,9 @@ class DiscardPile(arcade.Sprite):
             arcade.color.DEEP_COFFEE,
             self.BORDER_WIDTH
         )
+
+    def tile_overlaps(self, tile):
+        return (
+            abs(tile.center_x - self.center_x) * 2 < (TILE_WIDTH + self.BORDER_WIDTH)
+            and abs(tile.center_y - self.center_y) * 2 < (TILE_HEIGHT + self.BORDER_WIDTH)
+        )

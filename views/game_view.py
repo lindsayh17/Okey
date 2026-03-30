@@ -339,11 +339,8 @@ class GameView(arcade.View):
         player = self.game.turn.get_current_player()
         disc = player.discard_pile
 
-        print(arcade.check_for_collision(tile, disc))
-        print(disc.holding_tile)
-
         # remove tile from discard list if was in disc
-        if tile in disc.tiles and not arcade.check_for_collision(tile, disc):
+        if tile in disc.tiles and not disc.tile_overlaps(tile):
             disc.tiles.remove(tile)
             disc.holding_tile = False
 
@@ -356,21 +353,23 @@ class GameView(arcade.View):
         # check if tile touching slot
         touching_slot = None
         for slot in available_slots:
-            if not slot.holding_tile and arcade.check_for_collision(tile, slot):
+            if not slot.holding_tile and slot.tile_overlaps(tile):
                 touching_slot = slot
                 break
 
-        if touching_slot:
+        touching_discard = disc.tile_overlaps(tile)
+
+        if touching_discard and not touching_slot:
+            self.snap(tile, [disc])
+            disc.tiles.append(tile)
+            disc.holding_tile = True
+        elif touching_slot:
             self.snap(tile, available_slots)
             if touching_slot in self.open_stand_slot_list:
                 self.current_open_tiles.append(tile)
                 self.open_window_tiles.append(tile)
             if tile not in player.hand:
                 player.hand.append(tile)
-        elif arcade.check_for_collision(tile, disc):
-            self.snap(tile, [disc])
-            disc.tiles.append(tile)
-            disc.holding_tile = True
         else:
             self.snap(tile, available_slots)
 
@@ -397,12 +396,13 @@ class GameView(arcade.View):
 
         while available_slots and reset_position:
             # if closest slot is empty and tile is on top of it at all, snap
-            if not slot.holding_tile and arcade.check_for_collision(tile, slot):
+            if not slot.holding_tile and slot.tile_overlaps(tile):
                 tile.position = slot.center_x, slot.center_y
                 slot.holding_tile = True
 
                 # reset previous slot before changing curr slot to new location
-                tile.current_slot.holding_tile = False
+                if tile.current_slot is not None:
+                    tile.current_slot.holding_tile = False
                 tile.current_slot = slot
                 reset_position = False
             else:

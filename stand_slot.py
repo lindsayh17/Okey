@@ -27,3 +27,9 @@ class StandSlot(arcade.Sprite):
             TILE_HEIGHT,
             self.color
         )
+
+    def tile_overlaps(self, tile):
+        return (
+            abs(tile.center_x - self.center_x) * 2 < TILE_WIDTH
+            and abs(tile.center_y - self.center_y) * 2 < TILE_HEIGHT
+        )
