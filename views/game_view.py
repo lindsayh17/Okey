@@ -1,5 +1,6 @@
 import arcade
 from com import Com, COM_WIDTH
+from open_stand import OpenStand
 from stand_slot import StandSlot, DIVIDER_GAP
 from engine.game import Game
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
@@ -31,6 +32,7 @@ class GameView(arcade.View):
 
         # Stand specifications
         self.player_stand = Stand()
+        self.open_stand = OpenStand()
 
         self.held_tiles = []
 
@@ -56,8 +58,8 @@ class GameView(arcade.View):
 
         # TODO: DELETE THESE TWO LINES, ONLY HERE FOR TESTING PLAYER OPEN
         self.game.players[0].can_open = True
-        self.game.players[0].sets_played = [[1, 2, 3, 4], [4, 4, 4], [9, 10, 11, 12],
-                                            [1, 1, 1, 1, 1]]
+        self.game.players[0].open_tiles = [[1, 2, 3, 4], [4, 4, 4], [9, 10, 11, 12],
+                                           [1, 1, 1, 1, 1]]
 
 
         # Clear any existing sprites
@@ -94,19 +96,7 @@ class GameView(arcade.View):
 
         if self.open_displaying_player is not None:
             # Draw window box
-            arcade.draw_lbwh_rectangle_filled(
-                2 * COM_WIDTH + DIVIDER_GAP,
-                self.player_stand.total_stand_height + DIVIDER_GAP,
-                self.width - (4 * COM_WIDTH + 2 * DIVIDER_GAP),
-                (self.height - self.player_stand.total_stand_height -
-                 2 * COM_WIDTH - 2 * DIVIDER_GAP),
-                arcade.color.GRAY_BLUE
-            )
-
-            # Draw slots
-            for slot in self.open_stand_slot_list:
-                slot.draw()
-
+            self.open_stand.draw_stand(self.open_displaying_player)
 
         self.gui.menu_button.draw()
         # Change open button if player can open
@@ -258,9 +248,8 @@ class GameView(arcade.View):
                     # Display hand
                     self.open_displaying_player = com.player
                     # TODO: Delete this line once we have logic implemented
-                    com.player.sets_played = [[1,2,3,4], [4, 4, 4], [9, 10, 11, 12],
-                                              [1, 1, 1, 1, 1]]
-                    self.setup_open_stand(com.player)
+                    com.player.open_tiles = [[1, 2, 3, 4], [4, 4, 4], [9, 10, 11, 12],
+                                             [1, 1, 1, 1, 1]]
                     return
 
                 # Closing currently open com window
@@ -282,12 +271,11 @@ class GameView(arcade.View):
             # See if any open window is displaying
             if self.open_displaying_player is None:
                 self.open_displaying_player = self.game.players[0]
-                self.setup_open_stand(self.open_displaying_player)
             # Stop displaying player open window
             else:
                 # Save tile to open sets list
                 if self.current_open_tiles:
-                    self.open_displaying_player.sets_played.append(self.current_open_tiles.copy())
+                    self.open_displaying_player.open_tiles.append(self.current_open_tiles.copy())
                 # Remove tile display with window
                 for tile in self.open_window_tiles:
                     if tile in self.tile_list:
@@ -413,28 +401,3 @@ class GameView(arcade.View):
         # if invalid spot reset
         if reset_position:
             tile.position = tile.current_slot.center_x, tile.current_slot.center_y
-
-    def setup_open_stand(self, player):
-        self.open_stand_slot_list.clear()
-        self.current_open_tiles.clear()
-
-        # Coordinates of the stand based on the size of the screen
-        self.player_stand.open_stand_start_x = 2 * COM_WIDTH + DIVIDER_GAP + TILE_WIDTH / 2
-
-        start_y = self.player_stand.total_stand_height + TILE_HEIGHT / 2 + DIVIDER_GAP
-
-        # Build as many rows as the player has sets in their open
-        for current_set, _ in enumerate(player.sets_played):
-            stand_y = start_y + current_set * (TILE_HEIGHT + 2 * DIVIDER_GAP)
-            # Build as many columns as there are length of the current set +
-            # 2 empty slots on either side
-            for column in range(len(player.sets_played[current_set]) + 4):
-                # stand_slot position
-                stand_x = self.player_stand.open_stand_start_x + column * TILE_WIDTH
-
-                # create stand_slot and append to the slot list
-                stand_slot = StandSlot(stand_x, stand_y, arcade.color.BLUE)
-                stand_slot.holding_tile = False
-                self.open_stand_slot_list.append(stand_slot)
-
-        # Insert tiles onto stand

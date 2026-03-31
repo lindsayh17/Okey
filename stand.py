@@ -8,7 +8,6 @@ class Stand:
     """
     def __init__(self):
         self.stand_start_x = 0
-        self.open_stand_start_x = 0
         self.stand_divider = 5
         self.rows = 2
         self.columns = 12
