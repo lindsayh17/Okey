@@ -243,7 +243,11 @@ class GameView(arcade.View):
                     top_tile = self.game.turn.draw_from_discard(discard)
                     if top_tile is None:
                         return
-                    print(f"Drawn from discard pile: {top_tile.value}")
+                    print(f"Drawn from discard pile: {top_tile.tile_info.value}")
+                    if top_tile not in self.tile_list:
+                        self.tile_list.append(top_tile)
+
+                    top_tile.tile_info.set_face_up()
 
                     # Add tile to gui hand
                     for slot in self.stand_slot_list:
@@ -253,7 +257,6 @@ class GameView(arcade.View):
                             slot.holding_tile = True
                             top_tile.current_slot = slot
                             break
-                    self.tile_list.append(top_tile)
                     return
 
         # Check if clicked on com

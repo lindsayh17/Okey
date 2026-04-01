@@ -53,7 +53,6 @@ class Turn:
         self.last_discard = tile
 
         # update to only show last tile
-        player.discard_pile.tiles.clear() # remove everything in discard pile
         player.discard_pile.tiles.append(tile) # add tile player just discarded
         player.discard_pile.holding_tile = False
 
