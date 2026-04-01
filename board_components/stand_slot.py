@@ -18,6 +18,8 @@ class StandSlot(arcade.Sprite):
 
         # For when adding tiles to stand
         self.holding_tile = False
+        # Set on OpenStand slots so drops go into the right open_tiles[row]
+        self.open_row_index = None
 
     def draw(self):
         arcade.draw_lbwh_rectangle_filled(

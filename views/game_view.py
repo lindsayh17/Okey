@@ -2,7 +2,7 @@ import arcade
 from board_components.com import Com, COM_WIDTH
 from board_components.stand_slot import StandSlot, DIVIDER_GAP
 from engine.game import Game
-from engine.tile import TILE_WIDTH, TILE_HEIGHT
+from engine.tile import TILE_WIDTH, TILE_HEIGHT, Tile, TileInfo
 from board_components.stand import Stand
 import assets.colors as colr
 from views.game_view_graphics import GameViewGraphics
@@ -31,7 +31,6 @@ class GameView(arcade.View):
 
         # Stand specifications
         self.player_stand = Stand()
-        self.open_stand = OpenStand()
 
         self.held_tiles = []
 
@@ -58,7 +57,7 @@ class GameView(arcade.View):
         self.game.players[0].can_open = True
         self.game.players[0].open_tiles = [[Tile(TileInfo(3, arcade.color.RED, "♥")), Tile(TileInfo(3, arcade.color.RED, "♥"))], [], [],
                                            []]
-
+        self.game.players[0].open_stand.update()
 
         # Clear any existing sprites
         self.stand_slot_list.clear()
@@ -94,7 +93,7 @@ class GameView(arcade.View):
 
         if self.open_displaying_player is not None:
             # Draw window box
-            self.open_stand.draw_stand(self.width, self.height, self.open_displaying_player)
+            self.open_displaying_player.open_stand.draw_stand(self.width, self.height)
 
         self.gui.menu_button.draw()
         # Change open button if player can open
@@ -245,9 +244,7 @@ class GameView(arcade.View):
                 if self.open_displaying_player is None:
                     # Display hand
                     self.open_displaying_player = com.player
-                    # TODO: Delete this line once we have logic implemented
-                    com.player.open_tiles = [[1, 2, 3, 4], [4, 4, 4], [9, 10, 11, 12],
-                                             [1, 1, 1, 1, 1]]
+                    com.player.open_stand.update()
                     return
 
                 # Closing currently open com window
@@ -267,7 +264,10 @@ class GameView(arcade.View):
         if self.gui.open_button.button_pressed(x, y) and self.game.players[0].can_open:
             # See if any open window is displaying
             if self.open_displaying_player is None:
+                self.game.players[0].open_stand.update()
+
                 self.open_displaying_player = self.game.players[0]
+
             # Stop displaying player open window
             else:
                 # Save tile to open sets list
@@ -325,7 +325,7 @@ class GameView(arcade.View):
 
         # get set of slots
         available_slots = list(self.stand_slot_list)
-        if self.open_displaying_player is not False:
+        if self.open_displaying_player is not None:
             available_slots = self.stand_slot_list + self.open_displaying_player.open_stand.slots
 
         # Snap tile to the closest stand slot or a com hand if displayed
@@ -345,7 +345,8 @@ class GameView(arcade.View):
         elif touching_slot:
             self.snap(tile, available_slots)
             if touching_slot in self.open_displaying_player.open_stand.slots:
-                self.current_open_tiles.append(tile)
+                self.open_displaying_player.open_tiles[touching_slot.open_row_index].append(tile)
+                self.open_displaying_player.open_stand.update()
                 self.open_window_tiles.append(tile)
             if tile not in player.hand:
                 player.hand.append(tile)

@@ -1,22 +1,24 @@
 import arcade
-from PIL.ImageChops import screen
 
 from engine.tile import TILE_WIDTH, TILE_HEIGHT
-from stand_slot import StandSlot, DIVIDER_GAP
-from com import COM_WIDTH
-from stand import Stand
+from board_components.stand_slot import StandSlot, DIVIDER_GAP
+from board_components.com import COM_WIDTH
+from board_components.stand import Stand
 
 class OpenStand(Stand):
     """
     Open stand with slots and tiles drawn on top
     """
-    def __init__(self):
+    def __init__(self, player):
         super().__init__()
         self.slots = []
         self.tiles = []
         self.open_stand_start_x = 0
+        self.player = player
 
-    def draw_stand(self, screen_width, screen_height, curr_player):
+        self.update()
+
+    def draw_stand(self, screen_width, screen_height):
         # draw window
         arcade.draw_lbwh_rectangle_filled(
             2 * COM_WIDTH + DIVIDER_GAP,
@@ -27,28 +29,31 @@ class OpenStand(Stand):
             arcade.color.GRAY_BLUE
         )
 
-        self.update_slots(curr_player)
         for slot in self.slots:
             slot.draw()
 
         for tile in self.tiles:
             tile.draw()
 
-    def update_slots(self, curr_player):
+    def update(self):
         self.slots = []
+        self.tiles = []
 
         self.open_stand_start_x = 2 * COM_WIDTH + DIVIDER_GAP + TILE_WIDTH / 2
 
         start_y = self.total_stand_height + TILE_HEIGHT / 2 + DIVIDER_GAP
 
         # Build as many rows as the player has sets in their open
-        for set_size, current_set in enumerate(curr_player.open_tiles):
-            stand_y = start_y + set_size * (TILE_HEIGHT + 2 * DIVIDER_GAP)
+        for set_index, current_set in enumerate(self.player.open_tiles):
+            # if not isinstance(current_set, list):
+            #     continue
+            stand_y = start_y + set_index * (TILE_HEIGHT + 2 * DIVIDER_GAP)
 
             # 1 empty slot on either side of current set
             stand_x = self.open_stand_start_x
             stand_slot = StandSlot(stand_x, stand_y, arcade.color.BLUE)
             stand_slot.holding_tile = False
+            stand_slot.open_row_index = set_index
             self.slots.append(stand_slot)
 
             # current set of tiles and their slots
@@ -57,6 +62,7 @@ class OpenStand(Stand):
                 stand_x = self.open_stand_start_x + (index + 1) * TILE_WIDTH
                 stand_slot = StandSlot(stand_x, stand_y, arcade.color.BLUE)
                 stand_slot.holding_tile = True
+                stand_slot.open_row_index = set_index
                 self.slots.append(stand_slot)
 
                 tile.set_x(self.open_stand_start_x + (index + 1) * TILE_WIDTH)
@@ -68,4 +74,7 @@ class OpenStand(Stand):
             stand_x = self.open_stand_start_x + (len(current_set) + 1) * TILE_WIDTH
             stand_slot = StandSlot(stand_x, stand_y, arcade.color.BLUE)
             stand_slot.holding_tile = False
+            stand_slot.open_row_index = set_index
             self.slots.append(stand_slot)
+
+        print(self.tiles)
