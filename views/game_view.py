@@ -330,6 +330,7 @@ class GameView(arcade.View):
                     row.insert(0, tile)
                 else:
                     row.append(tile)
+                self.tile_list.remove(tile)
                 self.open_displaying_player.open_stand.update()
             if tile not in player.hand:
                 player.hand.append(tile)
