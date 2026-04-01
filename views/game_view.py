@@ -304,7 +304,9 @@ class GameView(arcade.View):
         # get set of slots
         available_slots = list(self.stand_slot_list)
         if self.open_displaying_player is not None:
-            available_slots = self.stand_slot_list + self.open_displaying_player.open_stand.slots
+            for slot in self.open_displaying_player.open_stand.slots:
+                if not slot.holding_tile and len(self.open_displaying_player.open_stand.tiles[slot.open_row_index]) > 0:
+                    available_slots.append(slot)
 
         # Snap tile to the closest stand slot or a com hand if displayed
         # check if tile touching slot
@@ -321,17 +323,25 @@ class GameView(arcade.View):
             disc.tiles.append(tile)
             disc.holding_tile = True
         elif touching_slot:
-            self.snap(tile, available_slots)
-            row_idx = getattr(touching_slot, "open_row_index", None)
+            row_index = touching_slot.open_row_index
             open_edge = getattr(touching_slot, "open_edge", None)
-            if self.open_displaying_player is not None and open_edge in ("before", "after"):
-                row = self.open_displaying_player.open_tiles[row_idx]
+
+            # only allow placement on rows with sets
+            if (self.open_displaying_player is not None and
+                row_index is not None and
+                    len(self.open_displaying_player.open_tiles[row_index]) > 2):
+                print(len(self.open_displaying_player.open_tiles[row_index]))
+                row = self.open_displaying_player.open_tiles[row_index]
                 if open_edge == "before":
                     row.insert(0, tile)
                 else:
                     row.append(tile)
                 self.tile_list.remove(tile)
+                self.snap(tile, available_slots)
                 self.open_displaying_player.open_stand.update()
+            else:
+                self.snap(tile, available_slots)
+
             if tile not in player.hand:
                 player.hand.append(tile)
         else:

@@ -32,12 +32,13 @@ class OpenStand(Stand):
         for slot in self.slots:
             slot.draw()
 
-        for tile in self.tiles:
-            tile.draw()
+        for tile_set in self.tiles:
+            for tile in tile_set:
+                tile.draw()
 
     def update(self):
         self.slots = []
-        self.tiles = []
+        self.tiles = self.player.open_tiles
 
         self.open_stand_start_x = 2 * COM_WIDTH + DIVIDER_GAP + TILE_WIDTH / 2
 
@@ -71,7 +72,6 @@ class OpenStand(Stand):
                 tile.set_y(stand_y)
                 tile.current_slot = stand_slot
                 tile.tile_info.set_face_up()
-                self.tiles.append(tile)
 
             stand_x = self.open_stand_start_x + (len(current_set) + 1) * TILE_WIDTH
             stand_slot = StandSlot(stand_x, stand_y, arcade.color.BLUE)
