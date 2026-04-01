@@ -12,7 +12,6 @@ class NameView(arcade.View):
     def __init__(self):
         super().__init__()
         self.manager = gui.UIManager()
-        self.manager.enable()
 
         # Label
         arcade.load_font("assets/fonts/IrishGrover-Regular.ttf")
@@ -76,6 +75,7 @@ class NameView(arcade.View):
 
     def on_show_view(self):
         self.background_color = colr.THEME_DARK_BLUE
+        self.manager.enable()
 
     def on_draw(self):
         self.clear()

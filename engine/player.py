@@ -6,6 +6,7 @@ scores that are dependent on how each evaluate tiles.
 
 from collections import defaultdict
 import math
+from board_components.open_stand import OpenStand
 
 
 def distance(t1, t2):
@@ -72,7 +73,8 @@ class Player:
         self.hand = [] # every player has a hand of tiles, empty initially
         self.groups = [] # groups of tiles put together by player, empty initially
         self.played = [] # tiles that are displayed when the player opens
-        self.sets_played = [] # sets of tiles out of what the player has opened with
+        self.open_tiles = [[],[],[],[]] # sets of tiles out of what the player has opened with
+        self.open_stand = OpenStand(self)
         self.used_tiles = set()  # Keep track of tiles that have already been used in a set or run
         self.discard_pile = disc # player's discard piles, empty initially
         self.locked_score = 0
