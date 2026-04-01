@@ -127,6 +127,17 @@ class Tile(arcade.Sprite):
     def unhighlight(self):
         self.gui["bg"].color = (222, 212, 193)
 
+    def tile_clicked(self, x, y):
+        """
+        Check whether tile was clicked (bounds match centered TILE_WIDTH × TILE_HEIGHT)
+        """
+        half_w = TILE_WIDTH / 2
+        half_h = TILE_HEIGHT / 2
+        return (
+            self.center_x - half_w < x < self.center_x + half_w
+            and self.center_y - half_h < y < self.center_y + half_h
+        )
+
     def __repr__(self):
         if self.tile_info.is_joker:
             return "JOKER"

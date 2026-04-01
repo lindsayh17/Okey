@@ -180,20 +180,21 @@ class GameView(arcade.View):
             return
 
         # TILE IS CLICKED
-        clicked_tiles = arcade.get_sprites_at_point((x, y), self.tile_list)
-        if len(clicked_tiles) > 0:
-            tile = clicked_tiles[0]
-
+        clicked_tile = None
+        for t in self.tile_list:
+            if t.tile_clicked(x, y):
+                clicked_tile = t
+        if clicked_tile:
             # prevent a player from picking up discarded tile after ending their turn
             for disc in self.game.discards:
-                if tile in disc.tiles and self.game.turn.turn_ended:
+                if clicked_tile in disc.tiles and self.game.turn.turn_ended:
                     print("Cannot move discarded tile after ending turn")
                     return
 
             # Otherwise allow normal dragging
-            self.held_tiles.append(tile)
-            self.pull_to_top(tile)
-            tile.highlight()
+            self.held_tiles.append(clicked_tile)
+            self.pull_to_top(clicked_tile)
+            clicked_tile.highlight()
             return
 
         # ---- Draw + discard
@@ -427,3 +428,7 @@ class GameView(arcade.View):
         # if invalid spot reset
         if reset_position:
             tile.position = tile.current_slot.center_x, tile.current_slot.center_y
+
+    def tile_clicked(self, x, y, tile):
+        return (tile.center_x - tile.width < x < tile.center_x + self.width
+                and tile.center_y - self.height < y < tile.center_y + self.height)
