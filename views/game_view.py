@@ -71,7 +71,7 @@ class GameView(arcade.View):
         self.setup_player_tiles()
 
         self.hand_score = arcade.Text(
-            str(self.game.turn.get_current_player().hand_score),
+            str(self.game.turn.players[0].hand_score),
             self.window.height * 0.03 + self.player_stand.total_stand_height * 0.75 * 0.5,
             self.window.height * 0.03 + self.player_stand.total_stand_height * 0.3,
             colr.THEME_TEAL,
@@ -133,7 +133,7 @@ class GameView(arcade.View):
         self.gui.score_label.draw()
 
         self.hand_score.text = str(
-            self.game.turn.get_current_player().hand_score
+            self.game.turn.players[0].hand_score
         )
         self.hand_score.draw()
         self.gui.end_turn_button.draw()
@@ -421,7 +421,7 @@ class GameView(arcade.View):
 
         self.held_tiles = []
         tile.unhighlight()
-        self.game.turn.get_current_player().player_get_hand_score()
+        self.game.turn.players[0].player_get_hand_score()
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:

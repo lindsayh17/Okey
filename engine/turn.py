@@ -169,8 +169,6 @@ class Turn:
 
         # -----1. Draw
         tile = self.draw_tile()
-        # # Simulated wait time
-        # time.sleep(2)
         # Gets the hand score and determines which tiles are being used for scoring
         player.get_hand_score()
         # TODO: Add opening logic here
@@ -179,9 +177,5 @@ class Turn:
         # Runs the com discard function
         self.discard_tile(player.com_discard_tile())
 
-        # Simulated wait time
-        # time.sleep(2)
-
         if self.has_discarded:
             self.end_turn()
-
