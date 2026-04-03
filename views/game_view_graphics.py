@@ -28,8 +28,8 @@ class GameViewGraphics:
                                              colr.THEME_DARK_BLUE])
 
         # menu
-        self.menu_button = ui_button.Button([window.width * 0.9,
-                                             window.height * 0.9],
+        self.menu_button = ui_button.Button([window.width - ((window.width / 15) / 2),
+                                             window.height - ((window.width / 15) / 2)],
                                             [window.width / 15,
                                              window.width / 15],
                                             "☰",
