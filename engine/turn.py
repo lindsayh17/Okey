@@ -1,4 +1,5 @@
 import time
+import arcade
 
 class Turn:
     """
@@ -159,18 +160,17 @@ class Turn:
 
         # If the current player is AI, run the com turn logic
         if next_player.is_player_ai:
-            time.sleep(2)
-            self.com_turn()
+            arcade.schedule_once(self.com_turn, 2)
 
-    def com_turn(self):
+    def com_turn(self, delta_time = 4):
         """Handles AI player's full turn."""
         player = self.get_current_player()
         print(f"AI player's turn: {player.name}")
 
         # -----1. Draw
         tile = self.draw_tile()
-        # Simulated wait time
-        time.sleep(2)
+        # # Simulated wait time
+        # time.sleep(2)
         # Gets the hand score and determines which tiles are being used for scoring
         player.get_hand_score()
         # TODO: Add opening logic here
@@ -180,7 +180,7 @@ class Turn:
         self.discard_tile(player.com_discard_tile())
 
         # Simulated wait time
-        time.sleep(2)
+        # time.sleep(2)
 
         if self.has_discarded:
             self.end_turn()
