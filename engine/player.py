@@ -401,32 +401,27 @@ class Player:
         return self.turn_score
     
     def open(self):
-        """Populates open_tiles with used tiles and removes them from the hand"""
+        """Populates open_tiles from used_tiles and removes tiles from hand"""
         print(f"{self.name} opened")
         self.opened = True
-        # Reset open_tiles so we start fresh each time this is called
-        self.open_tiles = [[], [], [], []]
-        
-        group_index = 0  # Tracks which sublist (group) we are currently filling
+        self.open_tiles = []
+        current_group = []
 
-        # Loop through all tiles that were used for opening
         for tile in self.used_tiles:
-            
-            # None acts as a separator between groups
+
             if tile is None:
-                group_index += 1  # Move to the next group
-                
-                # Stop if we exceed available groups
-                if group_index >= len(self.open_tiles):
-                    break
-            
+                if current_group:
+                    self.open_tiles.append(current_group)
+                    current_group = []
             else:
-                # Add tile to the current group in open_tiles
-                self.open_tiles[group_index].append(tile)
-                
-                # Remove the tile from the player's hand (if it exists there)
+                current_group.append(tile)
+
                 if tile in self.hand:
                     self.hand.remove(tile)
+
+        # append last group if exists
+        if current_group:
+            self.open_tiles.append(current_group)
         
     def add_valid_tiles_to_open(self):
         """
@@ -445,17 +440,32 @@ class Player:
         # ---------------------------------------------------
         # STEP 2: Move full groups from used_tiles → open_tiles
         # ---------------------------------------------------
+        new_groups = []
+        current = []
+
         for tile in self.used_tiles:
-
-            # None separates groups (set/run boundaries)
+            # None acts as a separator between groups inside used_tiles
+            # (if present). We finalize the current group when we hit it.
             if tile is None:
-                group_index += 1
-                if group_index >= len(self.open_tiles):
-                    break
+                if current:
+                    new_groups.append(current)
+                    current = []
             else:
-                self.open_tiles[group_index].append(tile)
+                # Build the current run/set group
+                current.append(tile)
 
-                # Remove tile from hand if it exists there
+        # Append the last group if the list did not end with None
+        if current:
+            new_groups.append(current)
+
+        for group in new_groups:
+            # Each group is independent and must NEVER merge with
+            # existing groups in open_tiles
+            self.open_tiles.append(group)
+
+            # Remove committed tiles from hand so they cannot be reused
+            # in future scoring cycles
+            for tile in group:
                 if tile in self.hand:
                     self.hand.remove(tile)
 
@@ -463,8 +473,18 @@ class Player:
         # STEP 3: Try to add leftover single tiles into groups
         # ---------------------------------------------------
         for tile in self.hand[:]:
-
+            
+            if tile is None:
+                continue
             for group in self.open_tiles:
+                if not group:
+                    continue
+
+                if group[0] is None:
+                    continue
+
+                # extra safety: strip any accidental None holdover
+                group = [t for t in group if t is not None]
                 if not group:
                     continue
 
@@ -475,7 +495,7 @@ class Player:
 
                 if is_set:
                     # Must match value
-                    if tile.tile_info.value != group[0].tile_info.value:
+                    if tile.tile_info.value != group[0].tile_info.value :
                         continue
 
                     # Enforce unique colors in set
