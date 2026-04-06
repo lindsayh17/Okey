@@ -50,12 +50,6 @@ class GameView(arcade.View):
         self.game.set_player_name(self.player_name)
         self.game.start_game()
 
-        # TODO: DELETE THESE TWO LINES, ONLY HERE FOR TESTING PLAYER OPEN
-        self.game.players[0].can_open = True
-        self.game.players[0].open_tiles = [[Tile(TileInfo(3, arcade.color.RED, "♥")),
-                                            Tile(TileInfo(3, arcade.color.RED, "♥"))], [], [],
-                                           []]
-
         self.game.players[0].open_stand.update()
 
         # Clear any existing sprites
@@ -202,6 +196,10 @@ class GameView(arcade.View):
         for t in self.tile_list:
             if t.tile_clicked(x, y):
                 clicked_tile = t
+        # lock tiles that have been taken to open space
+        if clicked_tile and clicked_tile.is_in_open:
+            print("Opened tiles cannot be moved")
+            return
         if clicked_tile:
             # prevent a player from picking up discarded tile after ending their turn
             for disc in self.game.discards:
@@ -280,17 +278,67 @@ class GameView(arcade.View):
                     self.open_displaying_player = None
                     return
 
-        # Check if open button was clicked
-        if self.gui.open_button.button_pressed(x, y) and self.game.players[0].can_open:
-            # See if any open window is displaying
-            if self.open_displaying_player is None:
-                self.game.players[0].open_stand.update()
+        # When open button is pressed
+        if self.gui.open_button.button_pressed(x, y):
+            """
+            This function moves valid arranged groups from hand to open,
+            prevents dragging back to hand, removes opened tiles, 
+            resets hand score and ensures tiles persist in next turn. 
+            """
 
-                self.open_displaying_player = self.game.players[0]
+            player = self.game.turn.get_current_player()
 
-            # Stop displaying player open window
-            else:
-                self.open_displaying_player = None
+            # ---- player has opened
+            if player.opened:
+                if self.open_displaying_player == player:
+                    self.open_displaying_player = None # close
+                else:
+                    player.open_stand.update()
+                    self.open_displaying_player = player
+                return
+
+            # ---- player has not opened
+            # use gui-based scoring when player arranges tiles
+            score = player.player_get_hand_score()
+
+            if score < 10: # temp number for testing
+                print("Not enough points to open. Reach 10")
+                return
+
+            groups = player.arranged_groups
+
+            if not groups:
+                print("No valid arranged groups to open with")
+                return
+
+            player.open_tiles = [[], [], [], []] # 4 rows for open sets
+
+            # moving groups to open racks, each group to a row
+            for i, group in enumerate(groups):
+                if i < 4:
+                    player.open_tiles[i] = group
+
+                for tile in group:
+                    if tile in player.hand:
+                        player.hand.remove(tile)
+
+                    if tile.current_slot:
+                        tile.current_slot.holding_tile = False
+
+                    if tile in self.tile_list:
+                        self.tile_list.remove(tile)
+
+                    tile.is_in_open = True # locking tile
+
+            player.open_stand.update()
+            player.hand_score = 0
+            # mark player as opened
+            player.opened = True
+            # display open window
+            self.open_displaying_player = player
+
+            print(f"{player.name} opened with {score} points!")
+
             return
 
         # Check if end_turn button was clicked
@@ -371,6 +419,14 @@ class GameView(arcade.View):
         if self.open_displaying_player is not None:
             if touching_slot:
                 row_index = touching_slot.open_row_index
+
+                # address TypeError
+                if row_index is None:
+                    self.snap(tile, available_slots)
+                    self.held_tiles = []
+                    tile.unhighlight()
+                    return
+
                 open_edge = getattr(touching_slot, "open_edge", None)
                 row = self.open_displaying_player.open_tiles[row_index]
                 if open_edge == "before":
@@ -421,7 +477,9 @@ class GameView(arcade.View):
 
         self.held_tiles = []
         tile.unhighlight()
-        self.game.turn.players[0].player_get_hand_score()
+
+        player = self.game.turn.players[0]
+        player.hand_Score = player.player_get_hand_score()
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:
