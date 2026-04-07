@@ -40,7 +40,6 @@ class GameView(arcade.View):
         self.open_displaying_player = None
 
         self.gui = GameViewGraphics(self.window, self.player_stand.total_stand_height)
-        self.hand_score = None
 
 
     def setup(self):
@@ -137,6 +136,11 @@ class GameView(arcade.View):
         )
         self.hand_score.draw()
         self.gui.end_turn_button.draw()
+
+        # Minimum open score display
+        self.gui.open_score.text = f"Minimum Open Score: {self.game.turn.open_score}"
+        self.gui.open_score.draw()
+
 
         # Draw tiles at end on top of everything.
         for tile in self.tile_list:
