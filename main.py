@@ -8,7 +8,7 @@ def main():
     arcade.load_font("assets/fonts/Itim-Regular.ttf")
     arcade.load_font("assets/fonts/IrishGrover-Regular.ttf")
     window = ViewManager(1200, 800, "Okey", resizable=False)
-    window.show_end()
+    window.show_title()
     arcade.run()
 
 if __name__ == "__main__":

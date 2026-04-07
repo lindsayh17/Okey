@@ -40,8 +40,7 @@ class EndView(arcade.View):
             font_name="Irish Grover"
         )
         if not self.quit:
-            # TODO: change back - debugging
-            place = 3
+            place = self.get_place()
 
             match place:
                 case 0:
