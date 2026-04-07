@@ -141,5 +141,7 @@ class ScoreboardView(arcade.View):
                     self.window.show_title()
                 case Views.MENU:
                     self.window.show_menu(self.game_view)
+                case Views.END:
+                    self.window.show_end(game=self.game)
                 case _:
                     self.window.show_menu(self.game_view)
