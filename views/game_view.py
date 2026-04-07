@@ -2,7 +2,6 @@ import arcade
 from board_components.com import Com, COM_WIDTH
 from board_components.stand import Stand
 from engine.game import Game
-from engine.tile import Tile, TileInfo
 import assets.colors as colr
 from views.game_view_graphics import GameViewGraphics
 
@@ -291,11 +290,9 @@ class GameView(arcade.View):
 
         # When open button is pressed
         if self.gui.open_button.button_pressed(x, y):
-            """
-            Allows valid arranged groups from hand to open,
-            prevents dragging back to hand, removes opened tiles, 
-            resets hand score and ensures tiles persist in next turn. 
-            """
+            # Allows valid arranged groups from hand to open,
+            # prevents dragging back to hand, removes opened tiles,
+            # resets hand score and ensures tiles persist in next turn.
 
             player = self.game.turn.get_current_player()
 
