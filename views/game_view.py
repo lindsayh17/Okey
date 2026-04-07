@@ -40,11 +40,10 @@ class GameView(arcade.View):
         self.open_displaying_player = None
 
         self.gui = GameViewGraphics(self.window, self.player_stand.total_stand_height)
-        self.hand_score = None
 
 
-    # Set up game
     def setup(self):
+        """Sets up the game"""
         # need to do this here so width and height are set up
         self.game = Game(self.width, self.height)
         self.game.set_player_name(self.player_name)
@@ -132,11 +131,17 @@ class GameView(arcade.View):
         self.hand_score.draw()
         self.gui.end_turn_button.draw()
 
+        # Minimum open score display
+        self.gui.open_score.text = f"Minimum Open Score: {self.game.turn.open_score}"
+        self.gui.open_score.draw()
+
+
         # Draw tiles at end on top of everything.
         for tile in self.tile_list:
             tile.draw()
 
     def setup_player_tiles(self):
+        """Sets up the player's tiles"""
         for i, tile in enumerate(self.game.players[0].hand):
             tile.set_curr_slot(self.stand_slot_list[i])
             self.stand_slot_list[i].holding_tile = True
@@ -145,6 +150,7 @@ class GameView(arcade.View):
 
     # Com setup
     def setup_coms(self):
+        """Sets up the computers"""
         screen_width = self.width
         screen_height = self.height
 
@@ -170,8 +176,13 @@ class GameView(arcade.View):
         Com.assign_unique_icons(self.com_list)
         Com.assign_unique_names(self.com_list)
 
+        for com in self.com_list:
+            if com.player is not self.game.players[0]:
+                com.player.name = com.name
+
     # Discard setup
     def setup_discard(self, player):
+        """Sets up discard"""
         pass
 
     def on_mouse_press(self, x, y, button, modifiers):
@@ -343,36 +354,37 @@ class GameView(arcade.View):
 
         # Check if end_turn button was clicked
         if self.gui.end_turn_button.button_pressed(x, y):
+            # Make sure no open window is displaying before ending turn
+            if self.open_displaying_player is None:
+                player = self.game.turn.get_current_player()
+                disc = player.discard_pile
 
-            player = self.game.turn.get_current_player()
-            disc = player.discard_pile
+                # must have visually placed a tile in discard
+                if not disc.tiles:
+                    print("Please place a tile in discard before ending your turn")
+                    return
 
-            # must have visually placed a tile in discard
-            if not disc.tiles:
-                print("Please place a tile in discard before ending your turn")
+                # get the tile that is visually in discard
+                tile = disc.tiles[-1]
+
+                if tile not in player.hand:
+                    print("You must place a *new* tile in discard before ending your turn")
+                    return
+
+                # Remove discarded tile from held tiles
+                if tile in self.held_tiles:
+                    self.held_tiles.remove(tile)
+                    tile.unhighlight()
+
+                # Don't draw tile over open display
+                if tile in self.tile_list:
+                    self.tile_list.remove(tile)
+
+                # Handing discard to game logic
+                self.game.turn.discard_tile(tile)
+                # now end turn
+                self.game.turn.end_turn()
                 return
-
-            # get the tile that is visually in discard
-            tile = disc.tiles[-1]
-
-            if tile not in player.hand:
-                print("You must place a *new* tile in discard before ending your turn")
-                return
-
-            # Remove discarded tile from held tiles
-            if tile in self.held_tiles:
-                self.held_tiles.remove(tile)
-                tile.unhighlight()
-
-            # Don't draw tile over open display
-            if tile in self.tile_list:
-                self.tile_list.remove(tile)
-
-            # Handing discard to game logic
-            self.game.turn.discard_tile(tile)
-            # now end turn
-            self.game.turn.end_turn()
-            return
 
         # check if menu was clicked
         if self.gui.menu_button.button_pressed(x, y):
@@ -490,8 +502,8 @@ class GameView(arcade.View):
         self.tile_list.remove(selected_tile)
         self.tile_list.append(selected_tile)
 
-    # Snap tile to a slot location
     def snap(self, tile, selected_list):
+        """Snaps a tile to a slot location"""
         reset_position = True
 
         # find the closest spot by looping through list
@@ -533,5 +545,6 @@ class GameView(arcade.View):
                 tile.position = tile.current_slot.center_x, tile.current_slot.center_y
 
     def tile_clicked(self, x, y, tile):
+        """Returns the location of a tile when it is clicked"""
         return (tile.center_x - tile.width < x < tile.center_x + self.width
                 and tile.center_y - self.height < y < tile.center_y + self.height)

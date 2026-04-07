@@ -78,6 +78,7 @@ class Player:
         self.stars = 0
         self.hand_score = 0 # score used for opening
         self.turn_score = 0 # score during a round that is added to total
+        self.round_scores = [] # scores of each turn
         self.total_score = 0 # accumulates over the no. of rounds
         self.drawn = False # Keeps track that one tile has been drawn per round
 
@@ -100,25 +101,38 @@ class Player:
 
     def com_discard_tile(self):
         """Handles AI player's discard logic."""
-        # Filter tiles that:
-        # - are not None
-        # - were not used in scoring
-        candidates = [
-            tile for tile in self.hand
-            if tile is not None and tile not in self.used_tiles
-        ]
+        if self.opened:
 
-        # If no valid tiles to discard, do nothing
-        if not candidates:
-            return None
+            valid_tiles = [t for t in self.hand if t is not None]
 
-        # Find the tile with the lowest value
-        lowest_tile = min(candidates, key=lambda t: t.tile_info.value)
+            if not valid_tiles:
+                return None
 
-        # Remove it from hand and add to discard
-        self.hand.remove(lowest_tile)
+            highest_tile = max(valid_tiles, key=lambda t: t.tile_info.value)
 
-        return lowest_tile
+            self.hand.remove(highest_tile)
+
+            return highest_tile
+        else:
+            # Filter tiles that:
+            # - are not None
+            # - were not used in scoring
+            candidates = [
+                tile for tile in self.hand
+                if tile is not None and tile not in self.used_tiles
+            ]
+
+            # If no valid tiles to discard, do nothing
+            if not candidates:
+                return None
+
+            # Find the tile with the lowest value
+            lowest_tile = min(candidates, key=lambda t: t.tile_info.value)
+
+            # Remove it from hand and add to discard
+            self.hand.remove(lowest_tile)
+
+            return lowest_tile
 
     def hand_size(self):
         """
@@ -138,105 +152,127 @@ class Player:
     # pylint: disable=R0912
     # Calculates the possible points earned for the player based on their current hand
     def get_hand_score(self):
-        """Calculates the possible points earned for the player based on their current hand"""
-        # Resets turn_score each time points are calculated
+        """Scores hand, sorts self.hand into sets/runs,
+        and stores only valid sets/runs in used_tiles"""
+
+        # Resets score each time points are calculated
         self.hand_score = 0
-        # Create a copy of the player's hand so we don't modify the original list
+
+        # Create a copy of the hand so we don't modify while iterating
         score_hand = list(self.hand)
 
-        # Keep track of tiles that have already been used in a set or run
-        # This prevents double-counting and enforces set priority
+        # Stores grouped sets/runs for ordering self.hand
+        final_groups = []
+
+        # used_tiles ONLY contains valid sets/runs (no leftovers)
+        self.used_tiles = []
 
         # ===================================
         # Check For Sets (Priority Over Runs)
         # A set = 3-4 tiles of the same number, all different colors
         # ===================================
 
-        # Group tiles by number
-        # Example: {5: [tile1, tile2, tile3], 8: [tile4, tile5]}
         number_groups = defaultdict(list)
 
         for tile in score_hand:
+            if tile is None:
+                continue  # IMPORTANT: skip separators
+
             number_groups[tile.tile_info.value].append(tile)
 
-        # Evaluate each number group to see if it forms a valid set
         for _, tiles in number_groups.items():
 
-            # Only consider tiles that have not already been used
             available_tiles = [t for t in tiles if t not in self.used_tiles]
 
-            # Ensure colors are unique (sets require different colors)
-            # Dictionary prevents duplicate colors
             unique_colors = {}
-            for tile in available_tiles:
-                if tile.tile_info.color not in unique_colors:
-                    unique_colors[tile.tile_info.color] = tile
+            for t in available_tiles:
+                if t.tile_info.color not in unique_colors:
+                    unique_colors[t.tile_info.color] = t
 
-            # Valid set must have 3 or 4 different colors
             if 3 <= len(unique_colors) <= 4:
                 valid_set = list(unique_colors.values())
 
-                # Mark these tiles as used so runs cannot reuse them
-                for tile in valid_set:
-                    self.used_tiles.add(tile)
+                final_groups.append(valid_set)
 
-                # Add sum of tile numbers to score
-                self.hand_score += sum(tile.tile_info.value for tile in valid_set)
+                # Store into used_tiles with separator
+                self.used_tiles.extend(valid_set)
+                self.used_tiles.append(None)
+
+                for t in valid_set:
+                    self.hand_score += t.tile_info.value
 
         # ===================================
         # Check For Runs (Using Remaining Tiles Only)
         # A run = 3+ consecutive numbers of the same color
         # ===================================
 
-        # Group remaining (unused) tiles by color
         color_groups = defaultdict(list)
 
         for tile in score_hand:
+            if tile is None:
+                continue  # skip separators
+
             if tile not in self.used_tiles:
                 color_groups[tile.tile_info.color].append(tile)
 
-        # Check each color group for consecutive sequences
         for _, tiles in color_groups.items():
 
-            # Sort tiles by number to detect consecutive values
-            # Ignores Jokers for the time being
             tiles = sorted(
                 [t for t in tiles if t.tile_info.value is not None],
                 key=lambda t: t.tile_info.value
             )
 
-            # Start building a potential run
-            current_run = [tiles[0]] if tiles else []
+            i = 0
 
-            # Iterate through sorted tiles to detect consecutive numbers
-            for i in range(1, len(tiles)):
+            while i < len(tiles):
 
-                # If current tile is exactly 1 greater than previous → consecutive
-                if int(tiles[i].tile_info.value) == tiles[i - 1].tile_info.value + 1:
-                    current_run.append(tiles[i])
+                run = [tiles[i]]
+
+                for j in range(i + 1, len(tiles)):
+
+                    if tiles[j].tile_info.value == run[-1].tile_info.value + 1:
+                        run.append(tiles[j])
+                    else:
+                        break
+
+                if len(run) >= 3:
+
+                    final_groups.append(run)
+
+                    self.used_tiles.extend(run)
+                    self.used_tiles.append(None)
+
+                    for t in run:
+                        self.hand_score += t.tile_info.value
+
+                    i += len(run)
 
                 else:
-                    # Sequence broke — check if the previous run is valid
-                    if len(current_run) >= 3:
-                        self.hand_score += sum(t.tile_info.value for t in current_run)
+                    i += 1
 
-                        # Mark run tiles as used
-                        for t in current_run:
-                            self.used_tiles.add(t)
+        # ===================================
+        # Collect Leftover Tiles (Not part of any set/run)
+        # ===================================
 
-                    # Start a new potential run
-                    current_run = [tiles[i]]
+        leftovers = [t for t in score_hand if t is not None and t not in self.used_tiles]
 
-            # After loop ends, check the final run
-            if len(current_run) >= 3:
-                self.hand_score += sum(t.tile_info.value for t in current_run)
-                for t in current_run:
-                    self.used_tiles.add(t)
+        # ===================================
+        # Sort the Hand (Sets/Runs First, Leftovers Last)
+        # ===================================
 
-                    # Add any joker tiles to used tiles
-                    self.used_tiles.update(t for t in score_hand if t.tile_info.is_joker)
+        new_hand = []
 
-        # Return score
+        # Add each valid group with None separators
+        for group in final_groups:
+            new_hand.extend(group)
+            new_hand.append(None)
+
+        # Add leftover tiles at the end (no separator after)
+        new_hand.extend(leftovers)
+
+        # Replace original hand with sorted version
+        self.hand = new_hand
+
         return self.hand_score
 
     # This function calculates hand_score for player
@@ -288,7 +324,7 @@ class Player:
             for subgroup in subgroups:
 
                 # Ignore groups smaller that are not 3-4 tiles
-                if len(subgroup) < 3:
+                if len(subgroup) < 3: #or len(subgroup) > 4
                     continue
 
                 # check regular and joker tiles
@@ -366,3 +402,152 @@ class Player:
         """Calculates the turn score after the turn has ended"""
         self.turn_score += sum(tile.tile_info.value for tile in self.hand)
         return self.turn_score
+
+    def open(self):
+        """Populates open_tiles from used_tiles and removes tiles from hand"""
+        print(f"{self.name} opened")
+        self.opened = True
+        self.open_tiles = []
+        current_group = []
+
+        for tile in self.used_tiles:
+
+            if tile is None:
+                if current_group:
+                    self.open_tiles.append(current_group)
+                    current_group = []
+            else:
+                current_group.append(tile)
+
+                if tile in self.hand:
+                    self.hand.remove(tile)
+
+        # append last group if exists
+        if current_group:
+            self.open_tiles.append(current_group)
+
+    def add_valid_tiles_to_open(self):
+        """
+        1. Uses get_hand_score() to generate full sets/runs in used_tiles
+        2. Moves those groups into open_tiles
+        3. Then tries to add remaining single tiles from hand into existing groups
+        """
+
+        # ---------------------------------------------------
+        # STEP 1: Generate valid sets/runs (stored in used_tiles)
+        # ---------------------------------------------------
+        self.get_hand_score()
+
+        # ---------------------------------------------------
+        # STEP 2: Move full groups from used_tiles → open_tiles
+        # ---------------------------------------------------
+        new_groups = []
+        current = []
+
+        for tile in self.used_tiles:
+            # None acts as a separator between groups inside used_tiles
+            # (if present). We finalize the current group when we hit it.
+            if tile is None:
+                if current:
+                    new_groups.append(current)
+                    current = []
+            else:
+                # Build the current run/set group
+                current.append(tile)
+
+        # Append the last group if the list did not end with None
+        if current:
+            new_groups.append(current)
+
+        for group in new_groups:
+            # Each group is independent and must NEVER merge with
+            # existing groups in open_tiles
+            self.open_tiles.append(group)
+
+            # Remove committed tiles from hand so they cannot be reused
+            # in future scoring cycles
+            for tile in group:
+                if tile in self.hand:
+                    self.hand.remove(tile)
+
+        # ---------------------------------------------------
+        # STEP 3: Try to add leftover single tiles into groups
+        # ---------------------------------------------------
+        for tile in self.hand[:]:
+
+            if tile is None:
+                continue
+            for group in self.open_tiles:
+                if not group:
+                    continue
+
+                if group[0] is None:
+                    continue
+
+                # extra safety: strip any accidental None holdover
+                group = [t for t in group if t is not None]
+                if not group:
+                    continue
+
+                # -------------------------
+                # CHECK IF GROUP IS A SET
+                # -------------------------
+                is_set = all(t.tile_info.value == group[0].tile_info.value for t in group)
+
+                if is_set:
+                    # Must match value
+                    if tile.tile_info.value != group[0].tile_info.value :
+                        continue
+
+                    # Enforce unique colors in set
+                    colors = {t.tile_info.color for t in group}
+                    if tile.tile_info.color in colors:
+                        continue
+
+                    group.append(tile)
+                    self.hand.remove(tile)
+                    break
+
+                # -------------------------
+                # CHECK IF GROUP IS A RUN
+                # -------------------------
+                is_run = all(t.tile_info.color == group[0].tile_info.color for t in group)
+
+                if is_run:
+                    if tile.tile_info.color != group[0].tile_info.color:
+                        continue
+
+                    values = sorted(t.tile_info.value for t in group)
+
+                    # Add to front
+                    if tile.tile_info.value == values[0] - 1:
+                        group.insert(0, tile)
+                        self.hand.remove(tile)
+                        break
+
+                    # Add to back
+                    if tile.tile_info.value == values[-1] + 1:
+                        group.append(tile)
+                        self.hand.remove(tile)
+                        break
+
+    def print_open_tiles(self):
+        """Prints open_tiles with visible grouping (sets/runs separated)."""
+
+        print("\nOPEN TILES:")
+
+        for i, group in enumerate(self.open_tiles):
+
+            if not group:
+                print(f"Group {i + 1}: EMPTY")
+                continue
+
+            values = []
+
+            for tile in group:
+                if tile is None:
+                    continue  # safety if separators exist
+
+                values.append(tile.tile_info.value)
+
+            print(f"Group {i + 1}: {values}")

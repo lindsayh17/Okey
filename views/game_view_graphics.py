@@ -7,6 +7,7 @@ class GameViewGraphics:
     Basic graphics (score label, buttons) for game view
     """
     def __init__(self, window, stand_height):
+        self.window = window
         # hand score
         self.score_label = arcade.Text(
             "Hand Score",
@@ -44,3 +45,15 @@ class GameViewGraphics:
                                             "End Turn",
                                             [colr.THEME_PINK,
                                             colr.THEME_DARK_BLUE])
+
+        self.open_score = arcade.Text(
+            "",
+            175,
+            self.window.height - 30,
+            colr.THEME_TEAL,
+            font_size=20,
+            anchor_x="center",
+            font_name="Irish Grover"
+
+        )
+
