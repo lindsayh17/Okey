@@ -6,6 +6,7 @@ from engine.player import Player
 from engine.discard_pile import DiscardPile
 from engine.tile import TILE_WIDTH
 from engine.turn import Turn
+from assets.utils import ROUNDS
 
 class Game:
     """
@@ -29,16 +30,6 @@ class Game:
 
         self.dealer = Dealer(self.window_width, self.window_height)
         self.turn = Turn(self.players)
-
-    def start_new_round(self, starting_player_idx=0):
-        """
-        Starts a new round
-        """
-        # Dealer deals cards to the player and computers after
-        # building tiles and randomizing. Returns remaining draw pile.
-        self.turn.draw_pile = self.dealer.deal_new_round(self.players, starting_player_idx)
-
-        self.turn.new_round(starting_player_idx)
 
     def discard_setup(self):
         """
@@ -65,12 +56,15 @@ class Game:
         """Sets the player's name to the inputed name"""
         self.players[0].name = name
 
-    def start_game(self):
+    def start_game(self, starting_player_idx=0):
         """
-        Loops through rounds but for now it does just one
-        :return:
+        Starts a new round
         """
-        self.start_new_round()
+        # Dealer deals cards to the player and computers after
+        # building tiles and randomizing. Returns remaining draw pile.
+        self.turn.draw_pile = self.dealer.deal_new_round(self.players, starting_player_idx)
+
+        self.turn.new_round(starting_player_idx)
 
     def debug_state(self):
         """
