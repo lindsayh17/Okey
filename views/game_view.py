@@ -106,7 +106,7 @@ class GameView(arcade.View):
 
         self.gui.menu_button.draw()
         # Change open button if player can open
-        if self.game.players[0].can_open:
+        if self.game.players[0].check_open(self.game.turn.open_score) or self.game.players[0].opened:
             self.gui.open_button.set_color(colr.THEME_YELLOW)
             self.gui.open_button.draw()
         else:
@@ -332,9 +332,8 @@ class GameView(arcade.View):
             # use gui-based scoring when player arranges tiles
             score = player.player_get_hand_score()
 
-            if score < 10: # temp number for testing
-                print("Not enough points to open. Reach 10")
-                self.gui.show_popup("Not enough points to open. Reach 81")
+            if score < self.game.turn.open_score: # temp number for testing
+                self.gui.show_popup(f"Not enough points to open. Reach {self.game.turn.open_score}")
                 return
 
             groups = player.arranged_groups

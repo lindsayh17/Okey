@@ -50,8 +50,6 @@ def group_tiles(tiles, y_threshold = 25):
 
     return groups
 
-
-#
 class Player:
     """
     Player class
@@ -73,7 +71,6 @@ class Player:
         self.open_stand = OpenStand(self)
         self.used_tiles = set()  # Keep track of tiles that have already been used in a set or run
         self.discard_pile = disc # player's discard piles, empty initially
-        self.can_open = False
         self.opened = False
         self.opened_this_turn = False # to prevent player from expanding tiles during opening
         self.stars = 0
@@ -158,9 +155,6 @@ class Player:
         # Resets score each time points are calculated
         self.hand_score = 0
 
-        # Create a copy of the hand so we don't modify while iterating
-        score_hand = list(self.hand)
-
         # Stores grouped sets/runs for ordering self.hand
         final_groups = []
 
@@ -174,7 +168,7 @@ class Player:
 
         number_groups = defaultdict(list)
 
-        for tile in score_hand:
+        for tile in self.hand:
             if tile is None:
                 continue  # IMPORTANT: skip separators
 
@@ -208,7 +202,7 @@ class Player:
 
         color_groups = defaultdict(list)
 
-        for tile in score_hand:
+        for tile in self.hand:
             if tile is None:
                 continue  # skip separators
 
@@ -216,37 +210,27 @@ class Player:
                 color_groups[tile.tile_info.color].append(tile)
 
         for _, tiles in color_groups.items():
-
             tiles = sorted(
                 [t for t in tiles if t.tile_info.value is not None],
                 key=lambda t: t.tile_info.value
             )
 
             i = 0
-
             while i < len(tiles):
-
                 run = [tiles[i]]
-
                 for j in range(i + 1, len(tiles)):
-
                     if tiles[j].tile_info.value == run[-1].tile_info.value + 1:
                         run.append(tiles[j])
                     else:
                         break
 
                 if len(run) >= 3:
-
                     final_groups.append(run)
-
                     self.used_tiles.extend(run)
                     self.used_tiles.append(None)
-
                     for t in run:
                         self.hand_score += t.tile_info.value
-
                     i += len(run)
-
                 else:
                     i += 1
 
@@ -254,24 +238,21 @@ class Player:
         # Collect Leftover Tiles (Not part of any set/run)
         # ===================================
 
-        leftovers = [t for t in score_hand if t is not None and t not in self.used_tiles]
+        leftovers = [t for t in self.hand if t is not None and t not in self.used_tiles]
 
         # ===================================
         # Sort the Hand (Sets/Runs First, Leftovers Last)
         # ===================================
 
-        new_hand = []
+        self.hand = []
 
         # Add each valid group with None separators
         for group in final_groups:
-            new_hand.extend(group)
-            new_hand.append(None)
+            self.hand.extend(group)
+            self.hand.append(None)
 
         # Add leftover tiles at the end (no separator after)
-        new_hand.extend(leftovers)
-
-        # Replace original hand with sorted version
-        self.hand = new_hand
+        self.hand.extend(leftovers)
 
         return self.hand_score
 
@@ -555,3 +536,8 @@ class Player:
     def check_complete(self):
         hand_tiles = [t for t in self.hand if t is not None]
         return len(hand_tiles) == 0
+
+    def check_open(self, open_score):
+        if self.turn_score >= open_score:
+            return True
+        return False

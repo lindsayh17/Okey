@@ -21,12 +21,10 @@ class DrawPile(arcade.Sprite):
         self.center_x = x
         self.center_y = y
 
-        self.label_x = self.center_x + TILE_WIDTH / 2
-        self.label_y = self.center_y + TILE_HEIGHT / 2
         self.tile_count_text = arcade.Text(
             str(self.count()),
-            self.label_x,
-            self.label_y,
+            self.center_x + TILE_WIDTH / 2,
+            self.center_y + TILE_HEIGHT / 2,
             arcade.color.WHITE,
             font_size=15,
             anchor_x="center",
@@ -57,18 +55,15 @@ class DrawPile(arcade.Sprite):
         return self.tiles.pop()
 
     def draw(self):
-
-
         if self.draw_highlight:
             self.highlight_tile.draw()
 
         # Back of top tile
-
         self.back_tile.draw()
 
         # label
-        arcade.draw_circle_filled(self.label_x,
-                                 self.label_y,
+        arcade.draw_circle_filled(self.center_x + TILE_WIDTH / 2,
+                                 self.center_y + TILE_HEIGHT / 2,
                                  TILE_WIDTH/4,
                                  colr.THEME_DARK_BLUE,
                                  num_segments=-1)

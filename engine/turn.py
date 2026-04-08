@@ -1,4 +1,5 @@
 import arcade
+from assets.utils import INITIAL_OPEN
 
 class Turn:
     """
@@ -14,7 +15,7 @@ class Turn:
         self.must_draw = False  # check if player must draw before discarding
         self.turn_ended = False  # to track if discard is finalized
         self.has_discarded = False # to track if a player discarded in their turn
-        self.open_score = 81 #Starts at 81
+        self.open_score = INITIAL_OPEN #Starts at 81
 
     def get_current_player(self):
         """
@@ -26,6 +27,7 @@ class Turn:
         """Sets all the variables for a new round"""
         # set turn to starting player (at start, current player is the starting player)
         self.current_player_idx = start_player
+        self.open_score = INITIAL_OPEN
 
         # at start, no previous discard yet
         self.last_discard = None

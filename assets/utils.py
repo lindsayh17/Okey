@@ -8,3 +8,4 @@ class Views(Enum):
     GAME = 'g'
 
 ROUNDS = 6 # change to 1 to debug
+INITIAL_OPEN = 81
