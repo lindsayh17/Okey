@@ -343,11 +343,9 @@ class GameView(arcade.View):
 
             player.open_stand.update()
             player.hand_score = 0
-            # mark player as opened
-            player.opened = True
+            player.opened = True # mark player as opened
             player.opened_this_turn = True
-            # display open window
-            self.open_displaying_player = player
+            self.open_displaying_player = player # display open window
 
             print(f"{player.name} opened with {score} points!")
 
@@ -422,9 +420,19 @@ class GameView(arcade.View):
         # check if tile touching slot
         touching_slot = None
         for slot in available_slots:
-            if not slot.holding_tile and slot.tile_overlaps(tile):
-                touching_slot = slot
-                break
+            is_open_slot = getattr(slot, "open_row_index", None) is not None
+            # slot is open rack
+            if is_open_slot:
+                # Open slots can be expanded
+                if slot.tile_overlaps(tile):
+                    touching_slot = slot
+                    break
+            # slot is player hand
+            else:
+                # Only empty slots
+                if not slot.holding_tile and slot.tile_overlaps(tile):
+                    touching_slot = slot
+                    break
 
         touching_discard = disc.tile_overlaps(tile)
 
@@ -434,38 +442,41 @@ class GameView(arcade.View):
             row_index = touching_slot.open_row_index
 
             # address TypeError
-            if row_index is None:
+            if row_index is not None: # open racks
 
                 current_player = self.game.turn.get_current_player()
 
+                # Block same turn adding tiles to open
                 if current_player.opened_this_turn:
-                    print("Cannot add tiles on the same turn you opened")
-                    self.snap(tile, available_slots)
+                    print("Cannot add tiles on the same turn you opened. Add at your next turn")
+                    self.snap(tile, self.stand_slot_list) # snap only back to hand
                     self.held_tiles = []
                     tile.unhighlight()
                     return
 
-                open_edge = getattr(touching_slot, "open_edge", None)
+                target_player = self.open_displaying_player
+                row = target_player.open_tiles[row_index]
 
-                row = self.open_displaying_player.open_tiles[row_index]
+                # ---------- Existing group ----------
+                if len(row) > 0: # if row already has a group
+                    success = self.game.turn.try_add_tile_to_group(tile, target_player, row_index)
 
-                # TEMP (next step = validation)
-                if open_edge == "before":
-                    row.insert(0, tile)
-                else:
-                    row.append(tile)
+                    if not success:
+                        print("Invalid move: does not fit this open group")
+                        self.snap(tile, self.stand_slot_list)
+                        self.held_tiles = []
+                        tile.unhighlight()
+                        return
 
-                if tile in self.tile_list:
-                    self.tile_list.remove(tile)
+                    if tile in self.tile_list:
+                        self.tile_list.remove(tile) # remove from gui
 
-                if tile in current_player.hand:
-                    current_player.hand.remove(tile)
+                    if tile in current_player.hand:
+                        current_player.hand.remove(tile) # remove from hand
 
-                tile.is_in_open = True
-
-                self.snap(tile, available_slots)
-                self.open_displaying_player.open_stand.update()
-
+                    tile.is_in_open = True
+                    target_player.open_stand.update()
+                # ---------- Existing group ----------
 
             else:
                 # snap tile back to original position
