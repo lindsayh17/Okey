@@ -17,7 +17,6 @@ class OpenStand(Stand):
         self.tiles = []
         self.open_stand_start_x = 0
         self.player = player
-
         self.update()
 
     def draw_stand(self, screen_width, screen_height):
