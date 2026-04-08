@@ -29,6 +29,7 @@ class Game:
 
         self.dealer = Dealer(self.window_width, self.window_height)
         self.turn = Turn(self.players)
+        self.curr_round = 1
 
     def discard_setup(self):
         """
@@ -59,6 +60,14 @@ class Game:
         """
         Starts a new round
         """
+        # reset player hands
+        for player in self.players:
+            player.hand = []
+
+        # reset discards
+        for discard in self.discards:
+            discard.tiles = []
+
         # Dealer deals cards to the player and computers after
         # building tiles and randomizing. Returns remaining draw pile.
         self.turn.draw_pile = self.dealer.deal_new_round(self.players, starting_player_idx)

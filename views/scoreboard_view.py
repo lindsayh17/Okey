@@ -50,7 +50,7 @@ class ScoreboardView(arcade.View):
 
             # Title text
             self.title_text = arcade.Text(
-                "Round Over.",
+                f"Round {self.game_view.game.curr_round - 1} Over.",
                 scoreboard_x,
                 self.scoreboard_y,
                 colr.THEME_PINK,
@@ -96,7 +96,7 @@ class ScoreboardView(arcade.View):
         column_width = 80
         total_score_gap = 100
         border_thickness = 4
-        name_width = 200
+        name_width = 250
 
         grid_width = name_width + (total_rounds * column_width) + total_score_gap
 

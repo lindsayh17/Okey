@@ -3,7 +3,7 @@ from board_components.com import Com, COM_WIDTH
 from board_components.stand import Stand
 from engine.game import Game
 import assets.colors as colr
-from assets.utils import Views
+from assets.utils import Views, ROUNDS
 from views.game_view_graphics import GameViewGraphics
 
 # Game window class
@@ -15,7 +15,7 @@ class GameView(arcade.View):
         super().__init__()
 
         # create a new game
-        self.game = None
+        self.game = Game(self.width, self.height)
 
         # get player name from previous screen
         self.player_name = player_name
@@ -44,8 +44,6 @@ class GameView(arcade.View):
 
     def setup(self):
         """Sets up the game"""
-        # need to do this here so width and height are set up
-        self.game = Game(self.width, self.height)
         self.game.set_player_name(self.player_name)
         self.game.start_new_round()
 
@@ -58,10 +56,12 @@ class GameView(arcade.View):
 
         # Stand coordinates
         self.stand_slot_list = self.player_stand.setup(self.width)
+        print(len(self.stand_slot_list))
         # Com coordinates
         self.setup_coms()
 
         self.setup_player_tiles()
+        print(len(self.game.players[0].hand))
 
         self.hand_score = arcade.Text(
             str(self.game.turn.players[0].player_get_hand_score()),
@@ -590,4 +590,8 @@ class GameView(arcade.View):
                 and tile.center_y - self.height < y < tile.center_y + self.height)
 
     def handle_round_end(self):
-        self.window.show_scoreboard(Views.GAME, self.game, self, True)
+        if self.game.curr_round < ROUNDS:
+            self.game.curr_round += 1
+            self.window.show_scoreboard(Views.GAME, self.game, self, True)
+        else:
+            self.window.show_end(self.game, False)
