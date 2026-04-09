@@ -208,7 +208,7 @@ class Turn:
                     continue
                 for group_index in range(len(target_player.open_tiles)):
                     if self.try_add_tile_to_group(self.last_discard, target_player, group_index):
-                        self.draw_from_discard(previous_player.discard)
+                        self.draw_from_discard(previous_player.discard_pile)
         if not player.drawn:
             arcade.schedule_once(self.draw_tile, 1)
         player.add_valid_tiles_to_open()
