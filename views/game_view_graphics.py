@@ -76,5 +76,3 @@ class GameViewGraphics:
         self.manager.enable()
         error_box = Message(self.manager, text)
         error_box.show()
-
-

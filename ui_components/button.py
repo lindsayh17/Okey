@@ -63,5 +63,3 @@ class Button:
 
         # Change the color for a split second to look like it was pressed
         arcade.schedule_once(reset_color, 0.1)
-
-
