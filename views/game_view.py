@@ -305,7 +305,6 @@ class GameView(arcade.View):
                 # Sound effect
                 arcade.play_sound(sounds.rock, VOLUME)
                 print(f"Tile drawn from draw pile: {top_tile.tile_info.value}")
-
                 # Add tile to gui hand
                 for slot in self.stand_slot_list:
                     if not slot.holding_tile:
