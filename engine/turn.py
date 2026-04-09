@@ -1,5 +1,5 @@
 import arcade
-from assets.utils import INITIAL_OPEN
+from assets.utils import INITIAL_OPEN, STARS_OPEN
 
 class Turn:
     """
@@ -179,7 +179,10 @@ class Turn:
         if player.get_hand_score() >= self.open_score:
             print(f"{player.hand_score}")
             self.open_score = player.hand_score
+            if self.open_score >= STARS_OPEN and self.is_first_open():
+                player.stars += 1
             player.open()
+
         if player.opened:
             arcade.schedule_once(self.com_open_turn, 1)
         else:
@@ -309,3 +312,9 @@ class Turn:
                 player.calculate_round_score()
 
         return round_over
+
+    def is_first_open(self):
+        for p in self.players:
+            if p.opened:
+                return False
+        return True

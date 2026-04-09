@@ -20,11 +20,9 @@ class ScoreboardView(arcade.View):
         self.exit_button = None
         self.round_end = round_end
 
-        # grid to hold rules
-        self.rule_sections = []
-        self.section_texts = []
+        self.stars = []
 
-        self. scoreboard_y = 17 * self.window.height / 20
+        self.scoreboard_y = 17 * self.window.height / 20
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
@@ -97,6 +95,7 @@ class ScoreboardView(arcade.View):
         total_score_gap = 100
         border_thickness = 4
         name_width = 250
+        star_size = self.window.height * 0.025
 
         grid_width = name_width + (total_rounds * column_width) + total_score_gap
 
@@ -105,6 +104,7 @@ class ScoreboardView(arcade.View):
         # Draw each player name
         for i, player in enumerate(self.game.players):
             player_y = top_margin - i * row_height
+
             arcade.draw_text(
                 player.name,
                 board_start_x,
@@ -113,6 +113,17 @@ class ScoreboardView(arcade.View):
                 font_size=30,
                 anchor_x="left",
             )
+
+            # draw stars under names
+            for index in range(player.stars):
+                star = arcade.Text(
+                    "★",
+                    board_start_x + star_size * index,
+                    player_y - 4 * star_size / 3,
+                    colr.THEME_YELLOW,
+                    font_size=star_size
+                )
+                star.draw()
 
             # Display score for each player's turn
             for round_index in range(total_rounds):
@@ -149,7 +160,7 @@ class ScoreboardView(arcade.View):
             total_score_x = (board_start_x + name_width +
                              (total_rounds * column_width) + total_score_gap)
             arcade.draw_text(
-                f"Total: {player.total_score}",
+                f"Total: {player.total_score - 100 * player.stars}",
                 total_score_x,
                 player_y,
                 colr.THEME_YELLOW,

@@ -3,7 +3,7 @@ from board_components.com import Com, COM_WIDTH
 from board_components.stand import Stand
 from engine.game import Game
 import assets.colors as colr
-from assets.utils import Views, ROUNDS
+from assets.utils import Views, ROUNDS, STARS_OPEN
 from views.game_view_graphics import GameViewGraphics
 
 # Game window class
@@ -414,6 +414,12 @@ class GameView(arcade.View):
             if not groups:
                 self.gui.show_popup("No valid arranged groups to open with")
                 return
+
+            print(f"Check score {player.hand_score} >= {STARS_OPEN}")
+            print(f"Check first {self.game.turn.is_first_open()}")
+            if player.hand_score >= STARS_OPEN and self.game.turn.is_first_open():
+                self.gui.show_popup("You have earned 1 star (-100 points).")
+                player.stars += 1
 
             self.move_groups_to_open(player, groups, reset=True) # call helper function
 
