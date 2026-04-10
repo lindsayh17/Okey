@@ -150,12 +150,6 @@ class GameView(arcade.View):
         else:
             self.game.turn.draw_pile.draw_highlight = False
 
-        # put any groups in open if player is open
-        if self.game.turn.get_current_player() is self.game.players[0]:
-            curr_player = self.game.players[0]
-            if curr_player.opened:
-                self.move_groups_to_open(curr_player, curr_player.arranged_groups, reset=True)
-
         # ui manager
         self.gui.manager.draw()
 
@@ -243,6 +237,7 @@ class GameView(arcade.View):
                 if len(group) < 3:
                     continue
 
+                print(player.open_tiles)
                 for i in range(len(player.open_tiles)):
                     if len(player.open_tiles[i]) == 0:
                         player.open_tiles[i] = list(group)
@@ -396,8 +391,6 @@ class GameView(arcade.View):
                 self.gui.show_popup("No valid groups to add")
                 return
 
-            self.move_groups_to_open(player, groups, reset=False)
-
             print("Added groups to open")
             return
 
@@ -430,13 +423,13 @@ class GameView(arcade.View):
                 self.gui.show_popup("No valid arranged groups to open with")
                 return
 
+            self.move_groups_to_open(player, groups, reset=False)
+
             print(f"Check score {player.hand_score} >= {STARS_OPEN}")
             print(f"Check first {self.game.turn.is_first_open()}")
             if player.hand_score >= STARS_OPEN and self.game.turn.is_first_open():
                 self.gui.show_popup("You have earned 1 star (-100 points).")
                 player.stars += 1
-
-            self.move_groups_to_open(player, groups, reset=True) # call helper function
 
             player.opened = True # mark player as opened
             player.opened_this_turn = True
@@ -552,16 +545,6 @@ class GameView(arcade.View):
 
                 current_player = self.game.turn.get_current_player()
 
-                # Block player from adding tiles to their open during their opening turn
-                # player may add to another player's open
-                if current_player.opened_this_turn and self.open_displaying_player == current_player:
-                    self.gui.show_popup("Cannot add tiles to your open tiles on the same turn you opened. "
-                                        "Add at your next turn")
-                    self.snap(tile, self.stand_slot_list) # snap only back to hand
-                    self.held_tiles = []
-                    tile.unhighlight()
-                    return
-
                 # block adding to any open racks if player has not opened yet
                 if not current_player.opened:
                     self.gui.show_popup("You must open before adding to another player's tiles.")
@@ -634,6 +617,13 @@ class GameView(arcade.View):
 
         player = self.game.turn.players[0]
         player.hand_score = player.player_get_hand_score()
+
+        # put any groups in open if player is open
+        if self.game.turn.get_current_player() is self.game.players[0]:
+            curr_player = self.game.players[0]
+            if curr_player.opened:
+                print("Moving")
+                self.move_groups_to_open(curr_player, curr_player.arranged_groups, reset=False)
 
     def on_mouse_motion(self, x, y, dx, dy):
         for moving_tile in self.held_tiles:
