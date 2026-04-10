@@ -5,7 +5,7 @@ from engine.game import Game
 import assets.colors as colr
 from assets.utils import Views, ROUNDS, STARS_OPEN
 from views.game_view_graphics import GameViewGraphics
-import assets.sounds as sounds
+from assets import sounds
 from assets.sounds import VOLUME
 # Game window class
 class GameView(arcade.View):
@@ -108,7 +108,7 @@ class GameView(arcade.View):
         self.gui.menu_button.draw()
         # Change open button if player can open
         if (self.game.players[0].check_open(self.game.turn.open_score) or
-            self.game.players[0].opened):
+                self.game.players[0].opened):
             self.gui.open_button.set_color(colr.THEME_YELLOW)
             self.gui.open_button.draw()
         else:
@@ -152,6 +152,12 @@ class GameView(arcade.View):
             self.game.turn.draw_pile.draw_highlight = True
         else:
             self.game.turn.draw_pile.draw_highlight = False
+
+        for com in self.com_list:
+            if com.player == self.game.turn.get_current_player():
+                com.playing = True
+            else:
+                com.playing = False
 
         # ui manager
         self.gui.manager.draw()
@@ -407,13 +413,13 @@ class GameView(arcade.View):
                 self.gui.show_popup("No valid arranged groups to open with")
                 return
 
-            self.move_groups_to_open(player, groups, reset=False)
-
             print(f"Check score {player.hand_score} >= {STARS_OPEN}")
             print(f"Check first {self.game.turn.is_first_open()}")
             if player.hand_score >= STARS_OPEN and self.game.turn.is_first_open():
                 self.gui.show_popup("You have earned 1 star (-100 points).")
                 player.stars += 1
+
+            self.move_groups_to_open(player, groups, reset=False)
 
             player.opened = True # mark player as opened
             player.opened_this_turn = True
@@ -445,8 +451,8 @@ class GameView(arcade.View):
                 tile = disc.tiles[-1]
 
                 if tile not in player.hand:
-                    self.gui.show_popup("You must place a *new* tile "
-                    "in discard before ending your turn.")
+                    self.gui.show_popup("You must place a *new* tile in "
+                                        "discard before ending your turn.")
                     return
 
                 # Remove discarded tile from held tiles

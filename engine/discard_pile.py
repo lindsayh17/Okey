@@ -33,9 +33,11 @@ class DiscardPile(arcade.Sprite):
         return None
 
     def draw(self):
+        width = TILE_WIDTH + self.BORDER_WIDTH
+        height = TILE_HEIGHT + self.BORDER_WIDTH
         arcade.draw_lbwh_rectangle_outline(
-            self.center_x - TILE_WIDTH / 2,
-            self.center_y - TILE_HEIGHT / 2,
+            self.center_x - width / 2,
+            self.center_y - height / 2,
             TILE_WIDTH + self.BORDER_WIDTH,
             TILE_HEIGHT + self.BORDER_WIDTH,
             arcade.color.DEEP_COFFEE,

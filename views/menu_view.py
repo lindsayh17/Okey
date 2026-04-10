@@ -23,11 +23,10 @@ class MenuView(arcade.View):
         self.window.background_color = colr.THEME_LIGHT_BLUE
 
         title_x = self.window.width / 2
-        title_y = 7 * self.window.height / 10
+        title_y = 8 * self.window.height / 10
 
         menu_buttons_width = self.window.width / 6
         button_height = self.window.height / 12
-        close_button = self.window.height / 16
 
         button_divider = button_height * 1.8
 
@@ -43,15 +42,6 @@ class MenuView(arcade.View):
             anchor_x="center",
             font_name="Irish Grover"
         )
-
-        # close button
-        self.close_button = button.Button([title_x + close_button * 3,
-                                         title_y + close_button * 1.5],
-                                         [close_button,
-                                         close_button],
-                                         "❌",
-                                         [colr.THEME_LIGHT_BLUE,
-                                         colr.THEME_DARK_BLUE])
 
         # rules button
         self.rules_button = button.Button([title_x,
@@ -77,6 +67,14 @@ class MenuView(arcade.View):
                                           "Quit",
                                           [colr.THEME_YELLOW,
                                           colr.THEME_DARK_BLUE])
+
+        self.close_button = button.Button([title_x,
+                                          title_y - button_divider * 4],
+                                          [menu_buttons_width,
+                                          button_height],
+                                          "Back",
+                                          [colr.THEME_DARK_BLUE,
+                                          colr.WHITE])
 
         # Reset the viewport, necessary if we have a scrolling game and we need
         # to reset the viewport back to the start so we can see what we draw.

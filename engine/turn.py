@@ -15,7 +15,7 @@ class Turn:
         self.must_draw = False  # check if player must draw before discarding
         self.turn_ended = False  # to track if discard is finalized
         self.has_discarded = False # to track if a player discarded in their turn
-        self.open_score = INITIAL_OPEN #Starts at 81
+        self.open_score = INITIAL_OPEN # Starts at 81
 
     def get_current_player(self):
         """
@@ -148,8 +148,7 @@ class Turn:
 
         # Updates open score if real player opened
         if not player.is_player_ai and player.opened_this_turn:
-            if player.hand_score >= self.open_score:
-                self.open_score = player.hand_score
+            self.open_score = max(self.open_score, player.hand_score)
 
         player.opened_this_turn = False
 

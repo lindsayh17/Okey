@@ -13,6 +13,7 @@ class TitleView(arcade.View):
         self.title_text = None
         self.play_button = None
         self.rules_button = None
+        self.quit_button = None
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
@@ -43,7 +44,7 @@ class TitleView(arcade.View):
                                          [button_width,
                                          button_height],
                                          "Play",
-                                         [colr.THEME_YELLOW,
+                                         [colr.THEME_LIGHT_BLUE,
                                          colr.THEME_DARK_BLUE])
 
         # rules button
@@ -53,6 +54,15 @@ class TitleView(arcade.View):
                                           button_height],
                                           "Rules",
                                           [colr.THEME_TEAL,
+                                          colr.THEME_DARK_BLUE])
+
+        # quit button
+        self.quit_button = button.Button([title_x,
+                                          title_y - button_height * 3],
+                                         [button_width,
+                                          button_height],
+                                         "Quit",
+                                         [colr.THEME_YELLOW,
                                           colr.THEME_DARK_BLUE])
 
         # Reset the viewport, necessary if we have a scrolling game and we need
@@ -65,6 +75,7 @@ class TitleView(arcade.View):
         self.title_text.draw()
         self.play_button.draw()
         self.rules_button.draw()
+        self.quit_button.draw()
 
     def on_mouse_press(self, x, y, _button, _modifiers):
         """ If the user presses the mouse button, start the game. """
@@ -72,3 +83,5 @@ class TitleView(arcade.View):
             self.window.show_name_entry()
         if self.rules_button.button_pressed(x, y):
             self.window.show_rules(Views.TITLE)
+        if self.quit_button.button_pressed(x, y):
+            arcade.close_window()
