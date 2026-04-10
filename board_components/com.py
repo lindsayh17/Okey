@@ -32,6 +32,7 @@ class Com(arcade.Sprite):
 
         # Assign random texture to com
         self.texture = textures.get_random_icon()
+        self.playing = False
 
     # Set different icons for each com
     @staticmethod
@@ -50,6 +51,10 @@ class Com(arcade.Sprite):
 
 
     def draw(self):
+        if not self.player.opened:
+            self.color = (105, 105, 105, 255)
+        else:
+            self.color = (255, 255, 255, 255)
         arcade.draw_sprite(self)
 
         # Update the label text and position
@@ -59,12 +64,12 @@ class Com(arcade.Sprite):
         # Draw the label
         self.label.draw()
 
-        if self.player.opened:
+        if self.playing:
             arcade.draw_lbwh_rectangle_outline(
                 self.center_x - COM_WIDTH,
                 self.center_y - COM_WIDTH,
                 150,
                 150,
-                colr.LIGHT_GOLDENROD_YELLOW,
-                4
+                colr.BRIGHT_YELLOW,
+                6
             )

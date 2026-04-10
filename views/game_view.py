@@ -35,6 +35,10 @@ class GameView(arcade.View):
         self.held_tiles = []
 
         self.open_displaying_player = None
+        self._pending_human_open = False
+        self._pending_open_player = None
+        self._pending_open_groups = None
+        self._pending_open_score = 0
 
         self.gui = GameViewGraphics(self.window, self.player_stand.total_stand_height)
 
@@ -145,6 +149,12 @@ class GameView(arcade.View):
             self.game.turn.draw_pile.draw_highlight = True
         else:
             self.game.turn.draw_pile.draw_highlight = False
+
+        for com in self.com_list:
+            if com.player == self.game.turn.get_current_player():
+                com.playing = True
+            else:
+                com.playing = False
 
         # ui manager
         self.gui.manager.draw()
