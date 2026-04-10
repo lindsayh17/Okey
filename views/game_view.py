@@ -245,7 +245,7 @@ class GameView(arcade.View):
                 if len(group) < 3:
                     continue
 
-                print(player.open_tiles)
+                # print(player.open_tiles)
                 for i in range(len(player.open_tiles)):
                     if len(player.open_tiles[i]) == 0:
                         player.open_tiles[i] = list(group)
@@ -411,8 +411,8 @@ class GameView(arcade.View):
                 self.gui.show_popup("No valid arranged groups to open with")
                 return
 
-            print(f"Check score {player.hand_score} >= {STARS_OPEN}")
-            print(f"Check first {self.game.turn.is_first_open()}")
+            # print(f"Check score {player.hand_score} >= {STARS_OPEN}")
+            # print(f"Check first {self.game.turn.is_first_open()}")
             if player.hand_score >= STARS_OPEN and self.game.turn.is_first_open():
                 self.gui.show_popup("You have earned 1 star (-100 points).")
                 player.stars += 1
@@ -611,7 +611,7 @@ class GameView(arcade.View):
         if self.game.turn.get_current_player() is self.game.players[0]:
             curr_player = self.game.players[0]
             if curr_player.opened:
-                print("Moving")
+                # print("Moving")
                 self.move_groups_to_open(curr_player, curr_player.arranged_groups, reset=False)
 
     def on_mouse_motion(self, x, y, dx, dy):
