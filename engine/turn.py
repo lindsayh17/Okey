@@ -272,15 +272,14 @@ class Turn:
 
         # RUN RULE
         if is_run:
-            values = sorted(t.tile_info.value for t in group)
+            values = [t.tile_info.value for t in group]
 
             # joker cannot be added if it goes out of bounds
             if tile.tile_info.is_joker:
                 if values[0] != 1 and values[1] != 2 and values[-1] != 13 and values[-2] != 12:
                     group.append(tile)
                     return True
-                else:
-                    return False
+                return False
 
             # check that color is the same
             if tile.tile_info.color != normal_tiles[0].tile_info.color:
