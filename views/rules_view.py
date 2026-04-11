@@ -25,21 +25,25 @@ class RulesView(arcade.View):
         self.objective_text = None
         self.rule_texts = [
             "Taking a Turn:\n\n"
-            "Draw from draw pile or previous player's discard (if open)\n"
-            "Add tile to your stand, discard it, or play it\n"
-            "Every turn ends by discarding",
+            "Draw from draw pile or previous player's discard\n"
+            "Add tile to your stand, discard it, or play it in an open\n"
+            "Every turn ends by discarding or winning the round.",
 
             "Opening Your Hand:\n\n"
             "Minimum 81 points to open\n"
-            "Separate groups of tiles by an empty space\n"
-            "Must exceed previous open value\n"
-            "100+ pts → star (-100)",
+            "Must exceed previous player's open value\n"
+            "Opening first and with 100+ points earns you a star\n"
+            "Click on other players icons to view and add to their open tiles",
 
             "Finishing The Round:\n\n"
-            "All tiles in hand must form valid groups",
+            "All tiles in a players hand form valid groups\n"
+            "Or the draw pile is empty\n",
 
             "Winning:\n\n"
-            "Lowest total score after 6 rounds"
+            "Lowest total score after 6 rounds\n"
+            "-100 pts per star\n"
+            "+100 pts per round not opened in\n"
+            "+value of non-open tiles for rounds that you opened in"
         ]
 
 
@@ -53,8 +57,6 @@ class RulesView(arcade.View):
         button_width = self.window.width / 5
         button_height = self.window.height / 10
 
-        arcade.load_font("assets/fonts/IrishGrover-Regular.ttf")
-
         # Title text
         self.title_text = arcade.Text(
             "Rules",
@@ -67,22 +69,26 @@ class RulesView(arcade.View):
         )
 
         self.objective_text = arcade.Text(
-            "Objective: Form runs and sets to minimize points.",
+            "Objective: Form runs and sets to minimize points.\nGroups must be separated "
+            "by an empty space to be counted.",
             rules_x,
             self.window.height * 0.8,
             colr.THEME_YELLOW,
             font_size=self.window.height * 0.03,
             anchor_x="center",
-            font_name="Irish Grover"
+            font_name="Irish Grover",
+            multiline = True,
+            width = self.window.width * 0.8,
+            align = "center"
         )
 
         # create sections for other rules
         section_width = self.window.width * 0.4
-        section_height = self.window.height * 0.22
+        section_height = self.window.height * 0.25
         left_x = self.window.width / 4
         right_x = self.window.width * 0.75
-        top_y = self.window.height * 0.62
-        bottom_y = self.window.height * 0.32
+        top_y = self.window.height * 0.60
+        bottom_y = self.window.height * 0.30
         sections = [
             (left_x, top_y),
             (right_x, top_y),
