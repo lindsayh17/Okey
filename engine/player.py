@@ -280,63 +280,73 @@ class Player:
                 # -------------------------
                 # CHECK SET
                 # -------------------------
-                same_number = len(set(numbers)) == 1
-                all_diff_colors = len(set(colors)) == len(colors)
-
-                if 3 <= len(subgroup) <= 4 and same_number and all_diff_colors:
-                    self.hand_score += sum(numbers)
-
-                    # add the jokers to the score
-                    self.hand_score += numbers[0] * len(joker_tiles)
-
-                    self.arranged_groups.append(subgroup)
-
-                    continue  # don't check run if already a set
-
+                if self.check_set(numbers, colors, subgroup, joker_tiles):
+                    # don't check run if a set
+                    continue
 
                 # -------------------------
                 # CHECK RUN
                 # -------------------------
-                same_color = len(set(colors)) == 1
-
-                # Check if each number increases by 1
-                is_consecutive = True
-                all_values = [t.tile_info.value for t in subgroup]
-                # set joker values
-                for index, _ in enumerate(all_values):
-                    # make joker value the next consecutive value if prior tile is valid
-                    if all_values[index] == 0 and index > 0:
-                        # joker cannot be 14
-                        if all_values[index - 1] == 13:
-                            is_consecutive = False
-                            break
-                        all_values[index] = all_values[index - 1] + 1
-                    # check if first tile is joker
-                    elif all_values[index] == 0 and index == 0:
-                        # joker cannot come before a 1 (or two jokers before a two)
-                        if all_values[index + 1] == 1 or all_values[index + 2] == 2:
-                            is_consecutive = False
-                            break
-                        # check for two jokers in a row
-                        if all_values[index + 1] == 0:
-                            all_values[index] = all_values[index + 2] - 2
-                        else:
-                            all_values[index] = all_values[index + 1] - 1
-
-                # check normal tiles
-                for index in range(len(all_values) - 1):
-                    if all_values[index] + 1 != all_values[index + 1]:
-                        is_consecutive = False
-                        break
-
-                # check color and add to hand score
-                if same_color and is_consecutive:
-                    self.hand_score += sum(all_values)
-
-                    self.arranged_groups.append(subgroup)
+                self.check_run(colors, subgroup)
 
         # Return total score from all valid groups sums
         return self.hand_score
+
+    # player_get_hand_score helpers
+    def check_set(self, numbers, colors, subgroup, joker_tiles):
+        same_number = len(set(numbers)) == 1
+        all_diff_colors = len(set(colors)) == len(colors)
+
+        if 3 <= len(subgroup) <= 4 and same_number and all_diff_colors:
+            self.hand_score += sum(numbers)
+
+            # add the jokers to the score
+            self.hand_score += numbers[0] * len(joker_tiles)
+
+            self.arranged_groups.append(subgroup)
+            return True
+
+    def check_run(self, colors, subgroup):
+        """
+        Check for runs in the player's hand
+        """
+        same_color = len(set(colors)) == 1
+
+        # Check if each number increases by 1
+        is_consecutive = True
+        all_values = [t.tile_info.value for t in subgroup]
+        # set joker values
+        for index, _ in enumerate(all_values):
+            # make joker value the next consecutive value if prior tile is valid
+            if all_values[index] == 0 and index > 0:
+                # joker cannot be 14
+                if all_values[index - 1] == 13:
+                    is_consecutive = False
+                    break
+                all_values[index] = all_values[index - 1] + 1
+            # check if first tile is joker
+            elif all_values[index] == 0 and index == 0:
+                # joker cannot come before a 1 (or two jokers before a two)
+                if all_values[index + 1] == 1 or all_values[index + 2] == 2:
+                    is_consecutive = False
+                    break
+                # check for two jokers in a row
+                if all_values[index + 1] == 0:
+                    all_values[index] = all_values[index + 2] - 2
+                else:
+                    all_values[index] = all_values[index + 1] - 1
+
+        # check normal tiles
+        for index in range(len(all_values) - 1):
+            if all_values[index] + 1 != all_values[index + 1]:
+                is_consecutive = False
+                break
+
+        # check color and add to hand score
+        if same_color and is_consecutive:
+            self.hand_score += sum(all_values)
+
+            self.arranged_groups.append(subgroup)
 
     def open(self):
         """Populates open_tiles from used_tiles and removes tiles from hand"""
