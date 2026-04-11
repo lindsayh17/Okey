@@ -52,13 +52,11 @@ class GameView(arcade.View):
 
         # Stand coordinates
         self.stand_slot_list = self.player_stand.setup(self.width)
-        # print(len(self.stand_slot_list))
         # Com coordinates
         if self.game.curr_round == 1:
             self.setup_coms()
 
         self.setup_player_tiles()
-        # print(len(self.game.players[0].hand))
 
         self.hand_score = arcade.Text(
             str(self.game.turn.players[0].player_get_hand_score()),
@@ -309,7 +307,6 @@ class GameView(arcade.View):
 
                 # Sound effect
                 arcade.play_sound(sounds.rock, VOLUME)
-                # print(f"Tile drawn from draw pile: {top_tile.tile_info.value}")
                 # Add tile to gui hand
                 for slot in self.stand_slot_list:
                     if not slot.holding_tile:
@@ -326,7 +323,6 @@ class GameView(arcade.View):
             for discard in self.game.discards:
                 # Check if clicked on discard not for player to access
                 if discard.collides_with_point((x, y)):
-                    #print(self.game.turn.get_current_player().opened)
                     if not discard.player_com_discard:
                         self.gui.show_popup("You can only draw from the player "
                                             "to your left's discard.")
@@ -408,8 +404,6 @@ class GameView(arcade.View):
                 self.gui.show_popup("No valid arranged groups to open with")
                 return
 
-            print(f"Check score {player.hand_score} >= {STARS_OPEN}")
-            print(f"Check first {self.game.turn.is_first_open()}")
             if player.hand_score >= STARS_OPEN and self.game.turn.is_first_open():
                 self.gui.show_popup("You have earned 1 star (-100 points).")
                 player.stars += 1
@@ -423,10 +417,6 @@ class GameView(arcade.View):
 
             self.open_displaying_player = player # display open window
             self.game.turn.open_score = score
-
-            print(f"{player.name} opened with {score} points!")
-            if player.is_player_ai:
-                self.gui.show_popup(f"{player.name} opened with {score} points")
 
             return
 

@@ -243,8 +243,6 @@ class Turn:
 
         # only check non-jokers
         normal_tiles = [t for t in group if not t.tile_info.is_joker]
-        print(normal_tiles)
-
 
         is_set = all(t.tile_info.value == normal_tiles[0].tile_info.value for t in normal_tiles)
         is_run = all(t.tile_info.color == normal_tiles[0].tile_info.color for t in normal_tiles)
