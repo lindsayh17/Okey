@@ -63,7 +63,7 @@ class Turn:
         print(f"--- End of {player.name}'s turn ---")
         self.has_discarded = True
 
-    def draw_tile(self, delta_time = 2):
+    def draw_tile(self, _delta_time = 2):
         """
         function that handles the action of drawing a tile from middle pile
         """
@@ -170,7 +170,7 @@ class Turn:
         self.must_draw = True # next player must draw
         self.has_discarded = False # reset discard tracking
         self.turn_ended = True # allow dragging back
-        player.drawn = False # next player hasn't drawn yet
+        next_player.drawn = False # next player hasn't drawn yet
 
         print(f"\n--- {next_player.name}'s turn ---")
         print(f"Open score: {self.open_score}")
@@ -184,13 +184,12 @@ class Turn:
         if next_player.is_player_ai:
             arcade.schedule_once(self.com_turn, 1)
 
-    def com_turn(self, delta_time = 2):
+    def com_turn(self, _delta_time = 2):
         """Handles AI player's full turn."""
         player = self.get_current_player()
         print(f"AI player's turn: {player.name}")
 
-        if player.get_hand_score() >= self.open_score:
-            #print(f"{player.hand_score}")
+        if player.get_hand_score() > self.open_score:
             self.open_score = player.hand_score
             if self.open_score >= STARS_OPEN and self.is_first_open():
                 player.stars += 1
@@ -202,7 +201,7 @@ class Turn:
             arcade.schedule_once(self.draw_tile, 1)
             arcade.schedule_once(self.com_discard, 2)
 
-    def com_discard(self, delta_time = 2):
+    def com_discard(self, _delta_time = 2):
         """Logic for computer discarding"""
         player = self.get_current_player()
         # Gets the hand score and determines which tiles are being used for scoring
@@ -214,7 +213,7 @@ class Turn:
         if self.has_discarded:
             self.end_turn()
 
-    def com_open_turn(self, delta_time = 2):
+    def com_open_turn(self, _delta_time = 2):
         """Logic for what a computer does on a turn if they have opened"""
         player = self.get_current_player()
         previous_player = self.players[(self.current_player_idx - 1) % len(self.players)]
@@ -242,11 +241,19 @@ class Turn:
         if tile is None or not group:
             return False
 
-        is_set = all(t.tile_info.value == group[0].tile_info.value for t in group)
-        is_run = all(t.tile_info.color == group[0].tile_info.color for t in group)
+        # only check non-jokers
+        normal_tiles = [t for t in group if not t.tile_info.is_joker]
+
+        is_set = all(t.tile_info.value == normal_tiles[0].tile_info.value for t in normal_tiles)
+        is_run = all(t.tile_info.color == normal_tiles[0].tile_info.color for t in normal_tiles)
 
         # SET RULE
         if is_set:
+            # a joker can always be appended to a set
+            if tile.tile_info.is_joker:
+                group.append(tile)
+                return True
+
             if tile.tile_info.value != group[0].tile_info.value:
                 return False
 
@@ -259,10 +266,38 @@ class Turn:
 
         # RUN RULE
         if is_run:
-            if tile.tile_info.color != group[0].tile_info.color:
+            values = [t.tile_info.value for t in group]
+
+            # joker cannot be added if it goes out of bounds
+            if tile.tile_info.is_joker:
+                if values[0] != 1 and values[1] != 2 and values[-1] != 13 and values[-2] != 12:
+                    group.append(tile)
+                    return True
                 return False
 
-            values = sorted(t.tile_info.value for t in group)
+            # check that color is the same
+            if tile.tile_info.color != normal_tiles[0].tile_info.color:
+                return False
+
+            # 1-2 jokers at beginning
+            if values[0] == 0 or (values[0] == 0 and values[1] == 0):
+                # check beginning
+                if tile.tile_info.value == values[2] - 3:
+                    group.insert(0, tile)
+                    return True
+                # check end
+                if tile.tile_info.value == values[-1] + 1:
+                    group.append(tile)
+                    return True
+
+            # 1-2 jokers at end
+            if values[-1] == 0 or (values[-1] == 0 and values[-2] == 0):
+                if tile.tile_info.value == values[-3] + 3:
+                    group.append(tile)
+                    return True
+                if tile.tile_info.value == values[0] - 1:
+                    group.insert(0, tile)
+                    return True
 
             if tile.tile_info.value == values[0] - 1:
                 group.insert(0, tile)

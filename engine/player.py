@@ -5,20 +5,7 @@ scores that are dependent on how each evaluate tiles.
 """
 
 from collections import defaultdict
-import math
 from board_components.open_stand import OpenStand
-
-def distance(t1, t2):
-    """
-    helper function to measure the Euclidean distance
-    between two tiles using their center positions
-    (center_x, center_y) on the screen
-    """
-    return math.sqrt(
-        (t1.center_x - t2.center_x) ** 2 +
-        (t1.center_y - t2.center_y) ** 2
-    )
-
 
 def group_tiles(tiles, y_threshold = 25):
     """
@@ -65,7 +52,6 @@ class Player:
         self.name = name
         self.is_player_ai = is_player_ai # distinguish human player vs AI player
         self.hand = [] # every player has a hand of tiles, empty initially
-        self.played = [] # tiles that are displayed when the player opens
         self.open_tiles = [[],[],[],[]] # sets of tiles out of what the player has opened with
         self.arranged_groups = [] # to track player's list of arranged valid groups
         self.open_stand = OpenStand(self)
@@ -75,7 +61,6 @@ class Player:
         self.opened_this_turn = False # to prevent player from expanding tiles during opening
         self.stars = 0
         self.hand_score = 0 # score used for opening
-        self.turn_score = 0 # score during a round that is added to total
         self.round_scores = [] # scores of each turn
         self.total_score = 0 # accumulates over the no. of rounds
         self.drawn = False # Keeps track that one tile has been drawn per round
@@ -85,17 +70,6 @@ class Player:
         Function that adds a tile to a player's hand
         """
         self.hand.append(tile)
-
-    def discard_tile(self, tile):
-        """
-        Removes a tile from the player's hand and
-        puts it in the discard pile
-        '"""
-        if tile not in self.hand:
-            raise ValueError("Tile not in hand to be discarded")
-        self.hand.remove(tile)
-        self.discard_pile.append(tile)
-        return tile # visible face-up tile discarded
 
     def com_discard_tile(self):
         """Handles AI player's discard logic."""
@@ -130,20 +104,6 @@ class Player:
         self.hand.remove(lowest_tile)
 
         return lowest_tile
-
-    def hand_size(self):
-        """
-        returns number of tiles in the hand
-        """
-        return len(self.hand)
-
-    def top_discard(self):
-        """
-        returns the last visible face-up discarded tile of player
-        """
-        if len(self.discard_pile) > 0:
-            return self.discard_pile[-1]
-        return None
 
     # TO-DO: address disabled 'R0912: Too many branches'
     # pylint: disable=R0912
@@ -320,69 +280,73 @@ class Player:
                 # -------------------------
                 # CHECK SET
                 # -------------------------
-                same_number = len(set(numbers)) == 1
-                all_diff_colors = len(set(colors)) == len(colors)
-
-                if 3 <= len(subgroup) <= 4 and same_number and all_diff_colors:
-                    self.hand_score += sum(numbers)
-
-                    # add the jokers to the score
-                    self.hand_score += numbers[0] * len(joker_tiles)
-
-                    self.arranged_groups.append(subgroup)
-
-                    continue  # don't check run if already a set
-
+                if self.check_set(numbers, colors, subgroup, joker_tiles):
+                    # don't check run if a set
+                    continue
 
                 # -------------------------
                 # CHECK RUN
                 # -------------------------
-                same_color = len(set(colors)) == 1
-
-                # Check if each number increases by 1
-                is_consecutive = True
-                all_values = [t.tile_info.value for t in subgroup]
-                # set joker values
-                for index, _ in enumerate(all_values):
-                    # make joker value the next consecutive value if prior tile is valid
-                    if all_values[index] == 0 and index > 0:
-                        # joker cannot be 14
-                        if all_values[index - 1] == 13:
-                            is_consecutive = False
-                            break
-                        all_values[index] = all_values[index - 1] + 1
-                    # check if first tile is joker
-                    elif all_values[index] == 0 and index == 0:
-                        # joker cannot come before a 1 (or two jokers before a two)
-                        if all_values[index + 1] == 1 or all_values[index + 2] == 2:
-                            is_consecutive = False
-                            break
-                        # check for two jokers in a row
-                        if all_values[index + 1] == 0:
-                            all_values[index] = all_values[index + 2] - 2
-                        else:
-                            all_values[index] = all_values[index + 1] - 1
-
-                # check normal tiles
-                for index in range(len(all_values) - 1):
-                    if all_values[index] + 1 != all_values[index + 1]:
-                        is_consecutive = False
-                        break
-
-                # check color and add to hand score
-                if same_color and is_consecutive:
-                    self.hand_score += sum(all_values)
-
-                    self.arranged_groups.append(subgroup)
+                self.check_run(colors, subgroup)
 
         # Return total score from all valid groups sums
         return self.hand_score
 
-    # Calculates the turn score after the turn has ended
-    def get_turn_score(self):
-        """Calculates the turn score after the turn has ended"""
-        self.turn_score += sum(tile.tile_info.value for tile in self.hand)
-        return self.turn_score
+    # player_get_hand_score helpers
+    def check_set(self, numbers, colors, subgroup, joker_tiles):
+        same_number = len(set(numbers)) == 1
+        all_diff_colors = len(set(colors)) == len(colors)
+
+        if 3 <= len(subgroup) <= 4 and same_number and all_diff_colors:
+            self.hand_score += sum(numbers)
+
+            # add the jokers to the score
+            self.hand_score += numbers[0] * len(joker_tiles)
+
+            self.arranged_groups.append(subgroup)
+            return True
+
+    def check_run(self, colors, subgroup):
+        """
+        Check for runs in the player's hand
+        """
+        same_color = len(set(colors)) == 1
+
+        # Check if each number increases by 1
+        is_consecutive = True
+        all_values = [t.tile_info.value for t in subgroup]
+        # set joker values
+        for index, _ in enumerate(all_values):
+            # make joker value the next consecutive value if prior tile is valid
+            if all_values[index] == 0 and index > 0:
+                # joker cannot be 14
+                if all_values[index - 1] == 13:
+                    is_consecutive = False
+                    break
+                all_values[index] = all_values[index - 1] + 1
+            # check if first tile is joker
+            elif all_values[index] == 0 and index == 0:
+                # joker cannot come before a 1 (or two jokers before a two)
+                if all_values[index + 1] == 1 or all_values[index + 2] == 2:
+                    is_consecutive = False
+                    break
+                # check for two jokers in a row
+                if all_values[index + 1] == 0:
+                    all_values[index] = all_values[index + 2] - 2
+                else:
+                    all_values[index] = all_values[index + 1] - 1
+
+        # check normal tiles
+        for index in range(len(all_values) - 1):
+            if all_values[index] + 1 != all_values[index + 1]:
+                is_consecutive = False
+                break
+
+        # check color and add to hand score
+        if same_color and is_consecutive:
+            self.hand_score += sum(all_values)
+
+            self.arranged_groups.append(subgroup)
 
     def open(self):
         """Populates open_tiles from used_tiles and removes tiles from hand"""
@@ -558,13 +522,10 @@ class Player:
 
     def reset(self):
         self.hand = []
-        self.played = []  # tiles that are displayed when the player opens
         self.open_tiles = [[], [], [], []]  # sets of tiles out of what the player has opened with
         self.arranged_groups = []  # to track player's list of arranged valid groups
         self.used_tiles = set()  # Keep track of tiles that have already been used in a set or run
         self.opened = False
         self.opened_this_turn = False  # to prevent player from expanding tiles during opening
-        self.stars = 0
         self.hand_score = 0  # score used for opening
-        self.turn_score = 0  # score during a round that is added to total
         self.drawn = False  # Keeps track that one tile has been drawn per round
