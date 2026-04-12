@@ -539,10 +539,18 @@ class GameView(arcade.View):
         touching_discard = disc.tile_overlaps(tile)
 
         if touching_slot and touching_slot.holding_tile:
+            print("Trying to split")
             self.split(tile, available_slots)
-        # Tile snapping if an open window is displaying
-        elif self.open_displaying_player is not None and touching_slot and not touching_slot.holding_tile:
+        # Tile snapping if an open window is displaying (only for open-rack slots;
+        # hand slots keep open_row_index None and must use snap_not_open)
+        elif (
+            self.open_displaying_player is not None
+            and touching_slot
+            and getattr(touching_slot, "open_row_index", None) is not None
+            and not touching_slot.holding_tile
+        ):
             row_index = touching_slot.open_row_index
+            print("Snapping to open")
             self.snap_if_open(row_index, tile, available_slots)
 
         # Tile snapping if no open window is displaying
