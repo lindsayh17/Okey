@@ -161,7 +161,7 @@ class GameView(arcade.View):
         if self.game.turn.is_first_open():
             required_score = self.game.turn.open_score
         else:
-            required_score = self.game.turn.open_score + 1 
+            required_score = self.game.turn.open_score + 1
 
         self.gui.open_score.text = f"Minimum Open Score: {required_score}"
         self.gui.open_score.draw()
