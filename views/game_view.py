@@ -401,7 +401,7 @@ class GameView(arcade.View):
         top_tile = self.game.turn.draw_from_discard(discard)
         if top_tile is None:
             return
-        print(f"Drawn from discard pile: {top_tile.tile_info.value}")
+        # print(f"Drawn from discard pile: {top_tile.tile_info.value}")
         if top_tile not in self.tile_list:
             self.tile_list.append(top_tile)
             # Sound effect
